@@ -1,0 +1,26 @@
+﻿<Window x:Class="AquaCalculationV2_0.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AquaCalculationV2_0"
+        xmlns:vm="clr-namespace:AquaCalculationV2_0.ViewModels"
+        xmlns:viewlab1="clr-namespace:AquaCalculationV2_0.Views.Lab1"
+        xmlns:viewlab2="clr-namespace:AquaCalculationV2_0.Views.Lab2"
+        xmlns:viewlab3="clr-namespace:AquaCalculationV2_0.Views.Lab3"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <DockPanel>
+        <TabControl>
+            <TabItem Header="Лаб 1">
+                <viewlab1:Lab1View DataContext="{Binding Lab1Model}"/>
+            </TabItem>
+            <TabItem Header="Лаб 2">
+                <viewlab2:Lab2View DataContext="{Binding Lab2Model}"/>
+            </TabItem>
+            <TabItem Header="Лаб 3">
+                <viewlab3:Lab3View DataContext="{Binding Lab3Model}"/>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

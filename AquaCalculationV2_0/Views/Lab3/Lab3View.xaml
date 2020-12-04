@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="AquaCalculationV2_0.Views.Lab3.Lab3View"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AquaCalculationV2_0.Views.Lab3"
+             xmlns:oxy="http://oxyplot.org/wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1*"/>
+            </Grid.ColumnDefinitions>
+            <DataGrid Grid.Column="0" ItemsSource="{Binding IntegralValue.XYValue}" AutoGenerateColumns="False">
+                <DataGrid.Columns>
+                    <DataGridTextColumn IsReadOnly="False" Header="X" Binding="{Binding X}" Width="*"/>
+                    <DataGridTextColumn IsReadOnly="False" Header="Y" Binding="{Binding Y}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <DockPanel Grid.Column="1">
+                <Button DockPanel.Dock="Top" Content="Обчислити" Command="{Binding IntegralRun}"/>
+                <TextBlock Text="X значение" DockPanel.Dock="Top"/>
+                <TextBox Text="{Binding IntegralCalculated}" DockPanel.Dock="Top"/>
+                <TextBlock Text="A значение" DockPanel.Dock="Top"/>
+                <TextBox Text="{Binding A}" DockPanel.Dock="Top"/>
+                <TextBlock Text="B значение" DockPanel.Dock="Top"/>
+                <TextBox Text="{Binding B}" DockPanel.Dock="Top"/>
+                <TextBlock Text="Формула" DockPanel.Dock="Top"/>
+                <TextBox Text="{Binding FormulaValue}" DockPanel.Dock="Top"/>
+                <TextBlock Text="Максимум вузлів" DockPanel.Dock="Top"/>
+                <TextBox Text="{Binding E}" DockPanel.Dock="Top"/>
+                <TextBlock Text="Кількість вузлів" DockPanel.Dock="Top"/>
+                <TextBox Text="{Binding IntegralValue.XYBuild.Count, Mode=OneWay}" DockPanel.Dock="Top"/>
+            </DockPanel>
+        </Grid>
+        <oxy:Plot Grid.Row="1">
+            <oxy:Plot.Axes>
+                <oxy:LinearAxis Position="Left"/>
+                <oxy:LinearAxis Position="Bottom"/>
+            </oxy:Plot.Axes>
+            <oxy:LineSeries Color="Blue"
+                                                ItemsSource="{Binding IntegralValue.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+            <oxy:LineSeries Color="Green"
+                                                ItemsSource="{Binding IntegralValue.XYBuild}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+            <oxy:StairStepSeries Color="Black"
+                                                ItemsSource="{Binding IntegralValue.XYBuild}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+            <oxy:LinearBarSeries Color="Black"
+                                                ItemsSource="{Binding IntegralValue.XYBuild}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+        </oxy:Plot>
+    </Grid>
+</UserControl>
