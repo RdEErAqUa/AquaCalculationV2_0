@@ -1,7 +1,6 @@
 ﻿using AquaCalculationV2_0.Servises;
-using AquaCalculationV2_0.Servises.Interfaces;
-using AquaCalculationV2_0.Servises.Interpolation;
-using AquaCalculationV2_0.Servises.Interpolation.Interfaces;
+using AquaCalculationV2_0.Servises.Integrals;
+using AquaCalculationV2_0.Servises.Integrals.Interfaces;
 using AquaCalculationV2_0.ViewModels;
 using AquaCalculationV2_0.ViewModels.Lab1;
 using AquaCalculationV2_0.ViewModels.Lab2;
@@ -36,13 +35,11 @@ namespace AquaCalculationV2_0
 
         private void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ILagrangeInterpolation, LagrangeInterpolation>();
-            services.AddSingleton<IIntegral, IntegralRectangles>();
-            //
-            services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<Lab1ViewModel>();
             services.AddSingleton<Lab2ViewModel>();
             services.AddSingleton<Lab3ViewModel>();
+
+            services.AddSingleton<MainWindowViewModel>();
         }
         protected override async void OnStartup(StartupEventArgs e)
         {

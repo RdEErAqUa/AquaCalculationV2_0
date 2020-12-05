@@ -1,15 +1,22 @@
-﻿using AquaCalculationV2_0.Servises.Interpolation.Interfaces;
+﻿using AquaCalculationV2_0.Models;
+using AquaCalculationV2_0.Servises.Interpolations.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
-namespace AquaCalculationV2_0.Servises.Interpolation
+namespace AquaCalculationV2_0.Servises.Interpolations
 {
-    class LagrangeInterpolation : ILagrangeInterpolation
+    class LagrangeInterpolation : IInterpolation
     {
-        public double InterpolationPolynom(List<double> x, List<double> y, double X, double Size)
+        public double InterpolationPolynom(ICollection<XYDataModel> data, double X)
         {
+            var x = data.Select(X => X.X).ToList();
+            var y = data.Select(Y => Y.Y).ToList();
+
             double answer = 0;
+
+            double Size = x.Count;
 
             for (int i = 0; i < Size; i++)
             {

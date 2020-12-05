@@ -1,6 +1,5 @@
 ﻿using AquaCalculationV2_0.Infrastructure.Commands;
 using AquaCalculationV2_0.Models;
-using AquaCalculationV2_0.Servises.Interfaces;
 using AquaCalculationV2_0.ViewModels.Base;
 using System;
 using System.Collections.Generic;
@@ -10,12 +9,19 @@ using System.Text;
 using System.Windows.Input;
 using org.mariuszgromada.math.mxparser;
 using System.Threading.Tasks;
+using AquaCalculationV2_0.Servises;
+using AquaCalculationV2_0.Servises.Integrals.Interfaces;
+using AquaCalculationV2_0.Servises.Integrals;
+using Microsoft.Extensions.DependencyInjection;
+using AquaCalculationV2_0.Servises.NumericalDifferentiations;
+using AquaCalculationV2_0.Servises.NumericalDifferentiations.Interfaces;
+using AquaCalculationV2_0.Servises.Interpolations.Interfaces;
+using AquaCalculationV2_0.Servises.Interpolations;
 
 namespace AquaCalculationV2_0.ViewModels.Lab3
 {
     class Lab3ViewModel : ViewModel
     {
-        private IIntegral RectangleIntegral { get; set; }
 
         #region IntegralValue : IntegralModel - функція, та деякі параметри інтеграла, який знаходиться.
 
@@ -72,8 +78,9 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
             try
             {
                 IsBusy = true;
+                var x = IntegralValue.XYValue.Select(X => X.X).ToList();
+                var y = IntegralValue.XYValue.Select(Y => Y.Y).ToList();
                 await Task.Run(() => {
-                    IntegralCalculated = RectangleIntegral.IntegralRun(IntegralValue, A, B, E, FormulaValue);
                 });
                 
             }
@@ -95,11 +102,8 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
         public string FormulaValue { get => _FormulaValue; set => Set(ref _FormulaValue, value); }
 
         #endregion
-
-        public Lab3ViewModel(IIntegral integral)
+        public Lab3ViewModel()
         {
-            this.RectangleIntegral = integral;
-
             IntegralRun = new AsyncLambdaCommand(OnIntegralRunExecuted, CanIntegralRunExecute);
             IntegralValue = new IntegralModel { XYValue = new ObservableCollection<XYDataModel> { } };
         }

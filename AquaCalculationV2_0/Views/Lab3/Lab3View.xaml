@@ -27,8 +27,8 @@
                 <Button DockPanel.Dock="Top" Content="Обчислити" Command="{Binding IntegralRun}"/>
                 <TextBlock Text="X значение" DockPanel.Dock="Top"/>
                 <TextBox Text="{Binding IntegralCalculated}" DockPanel.Dock="Top"/>
-                <TextBlock Text="A значение" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding A}" DockPanel.Dock="Top"/>
+                <TextBlock Text="Занятось" DockPanel.Dock="Top"/>
+                <TextBox Text="{Binding IsBusy, Mode=OneWay}" DockPanel.Dock="Top"/>
                 <TextBlock Text="B значение" DockPanel.Dock="Top"/>
                 <TextBox Text="{Binding B}" DockPanel.Dock="Top"/>
                 <TextBlock Text="Формула" DockPanel.Dock="Top"/>
@@ -52,11 +52,7 @@
                                                 ItemsSource="{Binding IntegralValue.XYBuild}"
                                                 DataFieldX="X"
                                                 DataFieldY="Y"/>
-            <oxy:StairStepSeries Color="Black"
-                                                ItemsSource="{Binding IntegralValue.XYBuild}"
-                                                DataFieldX="X"
-                                                DataFieldY="Y"/>
-            <oxy:LinearBarSeries Color="Black"
+            <oxy:LineSeries Color="Black"
                                                 ItemsSource="{Binding IntegralValue.XYBuild}"
                                                 DataFieldX="X"
                                                 DataFieldY="Y"/>
