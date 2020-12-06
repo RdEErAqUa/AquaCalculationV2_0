@@ -20,7 +20,7 @@ namespace AquaCalculationV2_0.Servises.Integrals
             {
 
             }
-            return 0;
+            return null;
         }
 
         public double Integral(ICollection<XYDataModel> xYDatas, double step, double a = 0, double b = 0)
