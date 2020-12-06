@@ -6,9 +6,9 @@ using System.Text;
 
 namespace AquaCalculationV2_0.Models
 {
-    class IntegralModel : ModelBase
+    class DataModel : ModelBase
     {
-        #region XYValue : ObservableCollection<XYDataModel> - координаты точек, в котором происходит интегрирование
+        #region XYValue : ObservableCollection<XYDataModel> - координаты точек
 
         private ObservableCollection<XYDataModel> _XYValue;
 

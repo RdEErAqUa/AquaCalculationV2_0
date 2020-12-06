@@ -20,8 +20,7 @@ namespace AquaCalculationV2_0.Servises.Integrals
             ICollection<XYDataModel> value = xYDatas.Where(x => a <= x.X && b >= x.X).ToList();
 
             for (int i = 0; i < value.Count; i++)
-                integralValue =
-                    (i == 0 || i == value.Count - 1 ? value.ElementAt(i).Y / 2.0 : value.ElementAt(i).Y);
+                integralValue = i == 0 || i == value.Count - 1 ? integralValue + value.ElementAt(i).Y / 2.0 : integralValue + value.ElementAt(i).Y;
 
             return (integralValue * step);
         }

@@ -17,59 +17,166 @@ using AquaCalculationV2_0.Servises.NumericalDifferentiations;
 using AquaCalculationV2_0.Servises.NumericalDifferentiations.Interfaces;
 using AquaCalculationV2_0.Servises.Interpolations.Interfaces;
 using AquaCalculationV2_0.Servises.Interpolations;
+using AquaCalculationV2_0.Models.RepresentedData;
 
 namespace AquaCalculationV2_0.ViewModels.Lab3
 {
     class Lab3ViewModel : ViewModel
     {
 
-        #region IntegralValue : IntegralModel - функція, та деякі параметри інтеграла, який знаходиться.
+        #region DataValue : DataValue - задані дані функції
 
-        private IntegralModel _IntegralValue;
+        private DataModel _DataValue;
 
-        public IntegralModel IntegralValue { get => _IntegralValue; set => Set(ref _IntegralValue, value); }
-
-        #endregion
-
-        #region IntegralCalculated : IntegralCalculated - значение интеграла
-
-        private double _IntegralCalculated;
-
-        public double IntegralCalculated { get => _IntegralCalculated; set => Set(ref _IntegralCalculated, value); }
+        public DataModel DataValue { get => _DataValue; set => Set(ref _DataValue, value); }
 
         #endregion
 
-        #region A : A - интеграл от A  до B  - это значение A
+        #region NeedInterpolationValue : double - в какой точке нужно найти интерполяцию
 
-        private double _A;
+        private double _NeedInterpolationValue;
 
-        public double A { get => _A; set => Set(ref _A, value); }
-
-        #endregion
-
-        #region B : B - A : A - интеграл от A  до B  - это значение B.
-
-        private double _B;
-
-        public double B { get => _B; set => Set(ref _B, value); }
+        public double NeedInterpolationValue { get => _NeedInterpolationValue; set => Set(ref _NeedInterpolationValue, value); }
 
         #endregion
 
-        #region E : E - если E >= 1 - количество вузлов для нахождения интеграла, 0 < E < 1 - точность интегрирования.
+        #region NeedInterpolationStep : double - с каким шагом нужно найти интерполяцию
 
-        private double _E = 0.1; 
+        private double _NeedInterpolationStep;
 
-        public double E { get => _E; set => Set(ref _E, value); }
+        public double NeedInterpolationStep { get => _NeedInterpolationStep; set => Set(ref _NeedInterpolationStep, value); }
 
+        #endregion
+
+        #region InterpolationValue : double - значення інтерполяції в точці
+
+        private double _InterpolationValue;
+
+        public double InterpolationValue { get => _InterpolationValue; set => Set(ref _InterpolationValue, value); }
+
+        #endregion
+
+        #region selectedDifferentiationData : DifferentiationData - выбранный метод дифференцирования
+
+        private DifferentiationData _selectedDifferentiationData;
+
+        public DifferentiationData selectedDifferentiationData
+        {
+            get => _selectedDifferentiationData; set
+            {
+                Set(ref _selectedDifferentiationData, value); 
+                DifferentiationMath.SetNumerecialDifferentiation(value.dataValue);
+            }
+        }
+
+        #endregion
+
+        #region selectedDifferentiationData : DifferentiationData - выбранный метод интегрирования
+
+        private IntegralData _selectedIntegralData;
+
+        public IntegralData selectedIntegralData
+        {
+            get => _selectedIntegralData; set
+            {
+                Set(ref _selectedIntegralData, value);
+                IntegralMath.SetIntegral(value.dataValue);
+            }
+        }
+
+        #endregion
+
+        #region selectedInterpolationData : InterpolationData - выбранный метод интерполирования
+
+        private InterpolationData _selectedInterpolationData;
+
+        public InterpolationData selectedInterpolationData { get => _selectedInterpolationData; set
+            {
+                Set(ref _selectedInterpolationData, value);
+                DifferentiationMath.SetInterpolation(value.dataValue);
+                IntegralMath.SetInterpolation(value.dataValue);
+                InterpolationMath.SetInterpolation(value.dataValue);
+            }
+        }
+
+        #endregion
+
+        #region differentiationDatas : ObservableCollection<DifferentiationData> - методы дифференцирования, загруженные в базу
+
+        private ObservableCollection<DifferentiationData> _differentiationDatas;
+
+        public ObservableCollection<DifferentiationData> differentiationDatas { get => _differentiationDatas; set => Set(ref _differentiationDatas, value); }
+
+        #endregion
+
+        #region interpolationDatas : ObservableCollection<InterpolationData> - методы интерполирования, загруженные в базу
+
+        private ObservableCollection<InterpolationData> _interpolationDatas;
+
+        public ObservableCollection<InterpolationData> interpolationDatas { get => _interpolationDatas; set => Set(ref _interpolationDatas, value); }
+
+        #endregion
+
+        #region integralDatas : ObservableCollection<IntegralData> - методы интегрирования, загруженные в базу
+
+        private ObservableCollection<IntegralData> _integralDatas;
+
+        public ObservableCollection<IntegralData> integralDatas { get => _integralDatas; set => Set(ref _integralDatas, value); }
+
+        #endregion
+
+        #region InterpolationRun -  интерполирование функции
+
+        private bool _isBusyInterpolation;
+        public bool isBusyInterpolation
+        {
+            get => _isBusyInterpolation;
+            private set => Set(ref _isBusyInterpolation, value);
+        }
+
+        public ICommand InterpolationRun { get; }
+        private async Task OnInterpolationRunExecuted(object p)
+        {
+            if (selectedInterpolationData == null)
+                return;
+            try
+            {
+                isBusyInterpolation = true;
+                await Task.Run(() => {
+                    switch ((int)p)
+                    {
+                        //Случай интерполирования в точке
+                        case 0:
+                            selectedInterpolationData.dataValue.InterpolationPolynom(DataValue.XYValue, NeedInterpolationValue);
+                            break;
+                        //Случай интерполирования с шагом
+                        case 1:
+                            for(double a = DataValue.XYValue.First().X; a < DataValue.XYValue.Last().X; a += NeedInterpolationStep)
+                                selectedInterpolationData.dataValue.InterpolationPolynom(DataValue.XYValue, a);
+                            break;
+                    }
+                });
+
+            }
+            finally
+            {
+                isBusyInterpolation = false;
+            }
+        }
+
+        private bool CanInterpolationRunExecute(object p)
+        {
+            return !isBusyInterpolation;
+        }
         #endregion
 
         #region IntegralRun -  посчитать интеграл, ассинхронная команда
 
-        private bool _isBusy;
-        public bool IsBusy
+        private bool _isBusyIntegral;
+        public bool isBusyIntegral
         {
-            get => _isBusy;
-            private set => Set(ref _isBusy, value);
+            get => _isBusyIntegral;
+            private set => Set(ref _isBusyIntegral, value);
         }
 
         public ICommand IntegralRun { get; }
@@ -77,35 +184,45 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
         {
             try
             {
-                IsBusy = true;
-                var x = IntegralValue.XYValue.Select(X => X.X).ToList();
-                var y = IntegralValue.XYValue.Select(Y => Y.Y).ToList();
+                isBusyIntegral = true;
                 await Task.Run(() => {
                 });
                 
             }
             finally
             {
-                IsBusy = false;
+                isBusyIntegral = false;
             }
         }
 
         private bool CanIntegralRunExecute(object p)
         {
-            return !IsBusy;
+            return !isBusyIntegral;
         }
         #endregion
 
-        #region FormulaValue : String - производная функции для подсеча ошибки
-        private string _FormulaValue;
+        private void ConfigureData()
+        {
+            differentiationDatas = new ObservableCollection<DifferentiationData> { };
+            interpolationDatas = new ObservableCollection<InterpolationData> { };
+            integralDatas = new ObservableCollection<IntegralData> { };
 
-        public string FormulaValue { get => _FormulaValue; set => Set(ref _FormulaValue, value); }
+            differentiationDatas.Add(new DifferentiationData { dataValue = new NewtonFirstDifferentiation(), methodName = "Перший многочлен Ньютона" });
+            differentiationDatas.Add(new DifferentiationData { dataValue = new NewtonSecondDifferentiation(), methodName = "Другий многочлен Ньютона" });
 
-        #endregion
+            interpolationDatas.Add(new InterpolationData { dataValue = new LagrangeInterpolation(), methodName = "Метод Лагранжа" });
+
+            integralDatas.Add(new IntegralData { dataValue = new IntegralRectangles(), methodName = "Метод прямокутника" });
+            integralDatas.Add(new IntegralData { dataValue = new IntegralTrapezoid(), methodName = "Метод трапецій" });
+            integralDatas.Add(new IntegralData { dataValue = new IntegralSimpson(), methodName = "Метод Сімпсона" });
+        }
+
         public Lab3ViewModel()
         {
+            ConfigureData();
+            InterpolationRun = new AsyncLambdaCommand(OnInterpolationRunExecuted, CanInterpolationRunExecute);
             IntegralRun = new AsyncLambdaCommand(OnIntegralRunExecuted, CanIntegralRunExecute);
-            IntegralValue = new IntegralModel { XYValue = new ObservableCollection<XYDataModel> { } };
+            DataValue = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
         }
     }
 }

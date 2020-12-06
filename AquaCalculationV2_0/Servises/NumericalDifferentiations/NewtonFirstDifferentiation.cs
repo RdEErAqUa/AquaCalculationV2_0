@@ -60,7 +60,7 @@ namespace AquaCalculationV2_0.Servises.NumericalDifferentiations
 
                 break;
             }
-            if (x.Contains(X) && x.Last() != X && x[x.Count - 2] != X)
+            if (x.Last() != X && x[x.Count - 2] != X)
             {
                 double f1 = 0;
                 double z = 1;
@@ -78,6 +78,10 @@ namespace AquaCalculationV2_0.Servises.NumericalDifferentiations
                 return f1;
             }
             return null;
+        }
+        public double Error(ICollection<XYDataModel> DataValue, double step)
+        {
+            throw new NotImplementedException();
         }
     }
 }

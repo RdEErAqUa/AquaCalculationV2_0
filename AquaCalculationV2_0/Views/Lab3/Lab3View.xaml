@@ -17,45 +17,101 @@
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
-            <DataGrid Grid.Column="0" ItemsSource="{Binding IntegralValue.XYValue}" AutoGenerateColumns="False">
+            <DataGrid Grid.Column="0" ItemsSource="{Binding DataValue.XYValue}" AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn IsReadOnly="False" Header="X" Binding="{Binding X}" Width="*"/>
                     <DataGridTextColumn IsReadOnly="False" Header="Y" Binding="{Binding Y}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
-            <DockPanel Grid.Column="1">
-                <Button DockPanel.Dock="Top" Content="Обчислити" Command="{Binding IntegralRun}"/>
-                <TextBlock Text="X значение" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding IntegralCalculated}" DockPanel.Dock="Top"/>
-                <TextBlock Text="Занятось" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding IsBusy, Mode=OneWay}" DockPanel.Dock="Top"/>
-                <TextBlock Text="B значение" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding B}" DockPanel.Dock="Top"/>
-                <TextBlock Text="Формула" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding FormulaValue}" DockPanel.Dock="Top"/>
-                <TextBlock Text="Максимум вузлів" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding E}" DockPanel.Dock="Top"/>
-                <TextBlock Text="Кількість вузлів" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding IntegralValue.XYBuild.Count, Mode=OneWay}" DockPanel.Dock="Top"/>
-            </DockPanel>
+            <StackPanel Grid.Column="1">
+                <TextBlock Text="Метод диференціювання"/>
+                <ComboBox ItemsSource="{Binding differentiationDatas}" SelectedItem="{Binding selectedDifferentiationData}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding methodName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock Text="Метод інтерполювання"/>
+                <ComboBox ItemsSource="{Binding interpolationDatas}" SelectedItem="{Binding selectedInterpolationData}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding methodName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock Text="Метод інтегрування"/>
+                <ComboBox ItemsSource="{Binding integralDatas}" SelectedItem="{Binding selectedIntegralData}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding methodName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
         </Grid>
-        <oxy:Plot Grid.Row="1">
-            <oxy:Plot.Axes>
-                <oxy:LinearAxis Position="Left"/>
-                <oxy:LinearAxis Position="Bottom"/>
-            </oxy:Plot.Axes>
-            <oxy:LineSeries Color="Blue"
-                                                ItemsSource="{Binding IntegralValue.XYValue}"
-                                                DataFieldX="X"
-                                                DataFieldY="Y"/>
-            <oxy:LineSeries Color="Green"
-                                                ItemsSource="{Binding IntegralValue.XYBuild}"
-                                                DataFieldX="X"
-                                                DataFieldY="Y"/>
-            <oxy:LineSeries Color="Black"
-                                                ItemsSource="{Binding IntegralValue.XYBuild}"
-                                                DataFieldX="X"
-                                                DataFieldY="Y"/>
-        </oxy:Plot>
+        <TabControl Grid.Row="1">
+            <TabItem Header="Интерполирование">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <TabControl>
+                        <TabItem Header="Таблица">
+                            
+                        </TabItem>
+                        <TabItem Header="График">
+                            
+                        </TabItem>
+                    </TabControl>
+                    <TabControl Grid.Column="1">
+                        <TabItem Header="Интерполирование в значении">
+                            <StackPanel Grid.Column="1">
+                                <Button Content="Вычислить"/>
+                                <TextBlock Text="Число, для интерполирования X* - "/>
+                                <TextBox/>
+                                <TextBlock Text="Значение X* - "/>
+                                <TextBox IsEnabled="False"/>
+                            </StackPanel>
+                        </TabItem>
+                        <TabItem Header="Интерполирование с шагом">
+                            <StackPanel Grid.Column="1">
+                                <Button Content="Вычислить"/>
+                                <TextBlock Text="Шаг для интерполирования - "/>
+                                <TextBox/>
+                            </StackPanel>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Дифференцирование">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="1">
+                        <Button Content="Вычислить"/>
+                        <TextBlock Text="Число, для диференцирования X* - "/>
+                        <TextBox/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Интегрирование">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="1">
+                        <Button Content="Вычислить"/>
+                        <TextBlock Text="Число, для интегрирования X* - "/>
+                        <TextBox/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        
     </Grid>
 </UserControl>

@@ -10,6 +10,7 @@ namespace AquaCalculationV2_0.Servises.NumericalDifferentiations.Interfaces
     interface INumericalDifferentiation
     {
         //Only 2-d differtiation
-        double? NumericalDiffertiationRun(ICollection<XYDataModel> DataValue, double X); 
+        double? NumericalDiffertiationRun(ICollection<XYDataModel> DataValue, double X);
+        double Error(ICollection<XYDataModel> DataValue, double step);
     }
 }

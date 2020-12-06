@@ -10,6 +10,11 @@ namespace AquaCalculationV2_0.Servises.NumericalDifferentiations
 {
     class LagrangeDifferentiation : INumericalDifferentiation
     {
+        public double Error(ICollection<XYDataModel> DataValue, double step)
+        {
+            throw new NotImplementedException();
+        }
+
         public double? NumericalDiffertiationRun(ICollection<XYDataModel> DataValue, double X)
         {
             throw new NotImplementedException();
