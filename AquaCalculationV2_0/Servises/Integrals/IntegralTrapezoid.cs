@@ -12,6 +12,7 @@ namespace AquaCalculationV2_0.Servises.Integrals
     {
         public double Error(ICollection<XYDataModel> data, double step, double a, double b) => (Math.Pow(step, 2.0) * (b - a) / 12.0) * DifferentiationMath.DifferentiationMaxInNodes(data, 2);
 
+        public ICollection<XYDataModel> Function(ICollection<XYDataModel> data) => data;
         public double Integral(ICollection<XYDataModel> xYDatas, double step, double a = 0, double b = 0)
         {
             if (a == b) { a = xYDatas.Select(X => X.X).ToList().Min(); b = xYDatas.Select(X => X.X).ToList().Max(); }

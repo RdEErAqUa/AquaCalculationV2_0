@@ -24,7 +24,7 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
     class Lab3ViewModel : ViewModel
     {
 
-        #region DataValue : DataValue - задані дані функції
+        #region DataValue : DataModel - задані дані функції
 
         private DataModel _DataValue;
 
@@ -32,6 +32,7 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
 
         #endregion
 
+        //Интерполирования
         #region NeedInterpolationValue : double - в какой точке нужно найти интерполяцию
 
         private double _NeedInterpolationValue;
@@ -56,6 +57,111 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
 
         #endregion
 
+        #region InterpolationValueData : DataModel - значение интерполяции с шагом
+
+        private DataModel _InterpolationValueData;
+
+        public DataModel InterpolationValueData { get => _InterpolationValueData; set => Set(ref _InterpolationValueData, value); }
+
+        #endregion
+        //Дифференцирования
+
+        #region NeedDifferentiationValue : double - в какой точке нужно найти дифференциал
+
+        private double _NeedDifferentiationValue;
+
+        public double NeedDifferentiationValue { get => _NeedDifferentiationValue; set => Set(ref _NeedDifferentiationValue, value); }
+
+        #endregion
+
+        #region NeedDifferentiationStep : double - с каким шагом нужно дифференцировать
+
+        private double _NeedDifferentiationStep;
+
+        public double NeedDifferentiationStep { get => _NeedDifferentiationStep; set => Set(ref _NeedDifferentiationStep, value); }
+
+        #endregion
+
+        #region NeedDifferentiationError : double - оишбка дифференцирования
+
+        private double _NeedDifferentiationError;
+
+        public double NeedDifferentiationError { get => _NeedDifferentiationError; set => Set(ref _NeedDifferentiationError, value); }
+
+        #endregion
+
+        #region DifferentiationValue : double - значення диференциала у точці
+
+        private double _DifferentiationValue;
+
+        public double DifferentiationValue { get => _DifferentiationValue; set => Set(ref _DifferentiationValue, value); }
+
+        #endregion
+
+        #region DifferentiationValueData : DataModel - значение дифференциации с шагом
+
+        private DataModel _DifferentiationValueData;
+
+        public DataModel DifferentiationValueData { get => _DifferentiationValueData; set => Set(ref _DifferentiationValueData, value); }
+
+        #endregion
+
+        //Интегрирования
+        #region NeedIntegralAValue : double - интервал от A до B на котором происходит интегрирование. Значение A
+
+        private double _NeedIntegralAValue;
+
+        public double NeedIntegralAValue { get => _NeedIntegralAValue; set => Set(ref _NeedIntegralAValue, value); }
+
+        #endregion
+
+        #region NeedIntegralBValue : double - интервал от A до B на котором происходит интегрирование. Значение B
+
+        private double _NeedIntegralBValue;
+
+        public double NeedIntegralBValue { get => _NeedIntegralBValue; set => Set(ref _NeedIntegralBValue, value); }
+
+        #endregion
+
+        #region NeedIntegralInterval : double - количество интервало на промежутке от A до B
+
+        private double _NeedIntegralInterval;
+
+        public double NeedIntegralInterval { get => _NeedIntegralInterval; set => Set(ref _NeedIntegralInterval, value); }
+
+        #endregion
+
+        #region NeedIntegralError : double - значение ошибки, которое не должен превысить интеграл на интервале от A до B(для Рунге и остаточного числа)
+
+        private double _NeedIntegralError = 0.01;
+
+        public double NeedIntegralError { get => _NeedIntegralError; set {
+                if (value < 1 && value > 0)
+                    Set(ref _NeedIntegralError, value);
+                else
+                    Set(ref _NeedInterpolationValue, 0.1);
+            } 
+        }
+
+        #endregion
+
+        #region IntegralValue : double - значение интеграла от A  до B
+
+        private double _IntegralValue;
+
+        public double IntegralValue { get => _IntegralValue; set => Set(ref _IntegralValue, value); }
+
+        #endregion
+
+        #region IntegralValueData : DataModel - значение интерполированого(для определения количества узлов в конце интегрирования)
+
+        private DataModel _IntegralValueData;
+
+        public DataModel IntegralValueData { get => _IntegralValueData; set => Set(ref _IntegralValueData, value); }
+
+        #endregion
+
+        //Выбор методов
         #region selectedDifferentiationData : DifferentiationData - выбранный метод дифференцирования
 
         private DifferentiationData _selectedDifferentiationData;
@@ -125,6 +231,51 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
 
         #endregion
 
+        #region TransferData -  трансфер данных
+
+        private bool _isBusyTransferDat;
+        public bool isBusyTransferDat
+        {
+            get => _isBusyTransferDat;
+            private set => Set(ref _isBusyTransferDat, value);
+        }
+
+        public ICommand TransferData { get; }
+        private async Task OnTransferDataExecuted(object p)
+        {
+            try
+            {
+                isBusyTransferDat = true;
+                await Task.Run(() => {
+                    switch (Int32.Parse((string)p))
+                    {
+                        //Случай трансфера с интерполирования в данные
+                        case 0:
+                            DataValue.XYValue = new ObservableCollection<XYDataModel>(InterpolationValueData.XYValue);
+                            break;
+                        //Случай трансфера с дифференцировани в данные
+                        case 1:
+                            DataValue.XYValue = new ObservableCollection<XYDataModel>(DifferentiationValueData.XYValue);
+                            break;
+                        case 2:
+                            DataValue.XYValue = new ObservableCollection<XYDataModel>(InterpolationValueData.XYValue);
+                            break;
+                    }
+                });
+
+            }
+            finally
+            {
+                isBusyTransferDat = false;
+            }
+        }
+
+        private bool CanTransferDataExecute(object p)
+        {
+            return !isBusyTransferDat;
+        }
+        #endregion
+
         #region InterpolationRun -  интерполирование функции
 
         private bool _isBusyInterpolation;
@@ -143,16 +294,18 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
             {
                 isBusyInterpolation = true;
                 await Task.Run(() => {
-                    switch ((int)p)
+                    switch (Int32.Parse((string)p))
                     {
                         //Случай интерполирования в точке
                         case 0:
-                            selectedInterpolationData.dataValue.InterpolationPolynom(DataValue.XYValue, NeedInterpolationValue);
+                            InterpolationValue = Math.Round(InterpolationMath.Interpolation(DataValue.XYValue, NeedInterpolationValue), 15);
                             break;
                         //Случай интерполирования с шагом
                         case 1:
-                            for(double a = DataValue.XYValue.First().X; a < DataValue.XYValue.Last().X; a += NeedInterpolationStep)
-                                selectedInterpolationData.dataValue.InterpolationPolynom(DataValue.XYValue, a);
+                            var temp = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
+                            for (double a = DataValue.XYValue.First().X; a < DataValue.XYValue.Last().X; a = Math.Round(a + NeedInterpolationStep, 15))
+                                temp.XYValue.Add(new XYDataModel { X = a, Y = Math.Round(InterpolationMath.Interpolation(DataValue.XYValue, a), 15) });
+                            InterpolationValueData = temp;
                             break;
                     }
                 });
@@ -170,6 +323,65 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
         }
         #endregion
 
+        #region DifferentiationRun -  дифференцирование функции
+
+        private bool _isBusyDifferentiation;
+        public bool isBusyDifferentiation
+        {
+            get => _isBusyDifferentiation;
+            private set => Set(ref _isBusyDifferentiation, value);
+        }
+
+        public ICommand DifferentiationRun { get; }
+        private async Task OnDifferentiationRunExecuted(object p)
+        {
+            if (selectedDifferentiationData == null && selectedInterpolationData == null)
+                return;
+            try
+            {
+                isBusyDifferentiation = true;
+                await Task.Run(() => {
+                    switch (Int32.Parse((string)p))
+                    {
+                        //Случай дифференцирования в точке
+                        case 0:
+                            DifferentiationValue = Math.Round(DifferentiationMath.Differentiation(DataValue.XYValue, NeedDifferentiationValue).Value, 15);
+                            break;
+                        //Случай дифференцирования с шагом
+                        case 1:
+                            var temp = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
+                            for (double a = DataValue.XYValue.First().X; a < DataValue.XYValue.Last().X; a = Math.Round(a + NeedDifferentiationStep, 15))
+                                temp.XYValue.Add(new XYDataModel { X = a, Y = Math.Round(InterpolationMath.Interpolation(DataValue.XYValue, a), 15) });
+                            var temp2 = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
+                            foreach (var el in temp.XYValue)
+                            {
+                                double? z = DifferentiationMath.Differentiation(temp.XYValue, el.X);
+                                if(z != null)
+                                    temp2.XYValue.Add(new XYDataModel { X = el.X, Y = Math.Round(z.Value, 15)});
+                            }
+                            DifferentiationValueData = temp2;
+                            break;
+                        //Случай дифференцирования с шагом Рунге
+                        case 2:
+                            DifferentiationValue = DifferentiationMath.DifferentiationWithRunge(DataValue.XYValue, NeedDifferentiationValue, NeedDifferentiationError) != null ?
+                            DifferentiationMath.DifferentiationWithRunge(DataValue.XYValue, NeedDifferentiationValue, NeedDifferentiationError).Value: 0;
+                            break;
+                    }
+                });
+
+            }
+            finally
+            {
+                isBusyDifferentiation = false;
+            }
+        }
+
+        private bool CanDifferentiationRunExecute(object p)
+        {
+            return !isBusyDifferentiation;
+        }
+        #endregion
+
         #region IntegralRun -  посчитать интеграл, ассинхронная команда
 
         private bool _isBusyIntegral;
@@ -182,12 +394,39 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
         public ICommand IntegralRun { get; }
         private async Task OnIntegralRunExecuted(object p)
         {
+            if (selectedInterpolationData == null && selectedDifferentiationData == null && selectedIntegralData == null)
+                return;
             try
             {
+                if (NeedIntegralAValue >= NeedIntegralBValue) { NeedIntegralAValue = DataValue.XYValue.Select(X => X.X).ToList().Min(); NeedIntegralBValue = DataValue.XYValue.Select(X => X.X).ToList().Max(); }
+
                 isBusyIntegral = true;
-                await Task.Run(() => {
+                await Task.Run(() =>
+                {
+                    switch (Int32.Parse((string)p))
+                    {
+                        //Случай интегрирования от A до B с количеством интервалов NeedIntegralInterval
+                        case 0:
+                            if (NeedIntegralInterval <= 0) return;
+                            double step = (NeedIntegralBValue - NeedIntegralAValue) / NeedIntegralInterval;
+
+                            var XYValueData = new ObservableCollection<XYDataModel> { };
+                            for (double a = NeedIntegralAValue; a <= NeedIntegralBValue; a = Math.Round(a + step, 15))
+                                XYValueData.Add(new XYDataModel { X = a, Y = Math.Round(InterpolationMath.Interpolation(DataValue.XYValue, a), 15) });
+
+                            IntegralValue = IntegralMath.Integral(XYValueData, step, NeedIntegralAValue, NeedIntegralBValue);
+                            IntegralValueData = new DataModel { XYValue = new ObservableCollection<XYDataModel>(IntegralMath.Function(XYValueData)) };
+                            break;
+                        //Случай интегрирование с шагом Рунге
+                        case 1:
+                            IntegralValue = IntegralMath.IntegralWithRunge(DataValue.XYValue, NeedIntegralAValue, NeedIntegralBValue, NeedIntegralError).Value;
+                            break;
+                        //Случай интегрирование с шагом остаточного числа
+                        case 2:
+                            IntegralValue = IntegralMath.IntegralWithError(DataValue.XYValue, NeedIntegralAValue, NeedIntegralBValue, NeedIntegralError).Value;
+                            break;
+                    }
                 });
-                
             }
             finally
             {
@@ -220,6 +459,8 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
         public Lab3ViewModel()
         {
             ConfigureData();
+            TransferData = new AsyncLambdaCommand(OnTransferDataExecuted, CanTransferDataExecute);
+            DifferentiationRun = new AsyncLambdaCommand(OnDifferentiationRunExecuted, CanDifferentiationRunExecute);
             InterpolationRun = new AsyncLambdaCommand(OnInterpolationRunExecuted, CanInterpolationRunExecute);
             IntegralRun = new AsyncLambdaCommand(OnIntegralRunExecuted, CanIntegralRunExecute);
             DataValue = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };

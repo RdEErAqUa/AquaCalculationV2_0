@@ -61,6 +61,8 @@ namespace AquaCalculationV2_0.Servises.Integrals
 
             return Integral(tempValue, step, a, b);
         }
+
+        static public ICollection<XYDataModel> Function(ICollection<XYDataModel> data) => _integral.Function(data);
         static public double? IntegralWithRunge(ICollection<XYDataModel> dataValue,  double a = 0, double b = 0 ,double E = 0.01)
         {
             double ErrorValue = 1;

@@ -10,5 +10,7 @@ namespace AquaCalculationV2_0.Servises.Integrals.Interfaces
         double Integral(ICollection<XYDataModel> xYDatas, double step, double a = 0, double b = 0);
 
         double Error(ICollection<XYDataModel> data, double step, double a, double b);
+
+        public ICollection<XYDataModel> Function(ICollection<XYDataModel> data);
     }
 }
