@@ -94,6 +94,6 @@ namespace AquaCalculationV2_0.Servises.Integrals
         static public double Error(ICollection<XYDataModel> data, double step, double a = 0, double b = 0) => _integral.Error(data, step, a, b);
         static public double Integral(ICollection<XYDataModel> data, double step, double a = 0, double b = 0) => _integral.Integral(data, step, a, b);
         static public double IntegralFullFillStep(ICollection<XYDataModel> data, double step, double a = 0, double b = 0) 
-            => Integral(InterpolationMath.FullFill(_interpolation, data, step), step, a, b);
+            => Integral(InterpolationMath.FullFill(data, step), step, a, b);
     }
 }

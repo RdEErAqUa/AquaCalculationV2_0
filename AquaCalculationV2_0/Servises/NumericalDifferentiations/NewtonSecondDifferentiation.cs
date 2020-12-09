@@ -37,7 +37,8 @@ namespace AquaCalculationV2_0.Servises.NumericalDifferentiations
             if (DataValue.Count < 2) return 0;
             var x = DataValue.Select(X => X.X).ToList();
             var y = DataValue.Select(Y => Y.Y).ToList();
-            var delY = FindDelY(y, 5);
+            int power = y.Count > 6 ? 5 : y.Count - 1;
+            var delY = FindDelY(y, power);
             double h = x[1] - x[0];
             int tempt = 0;
             foreach (var el in x)
@@ -46,7 +47,7 @@ namespace AquaCalculationV2_0.Servises.NumericalDifferentiations
                 else break;
             }
 
-            if (tempt > 0) tempt--;
+            if (tempt == x.Count) tempt--;
 
             double q = (X - x[tempt]) / h;
             int posX = 0;

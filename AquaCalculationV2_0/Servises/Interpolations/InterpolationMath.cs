@@ -24,14 +24,15 @@ namespace AquaCalculationV2_0.Servises.Interpolations
             }
         }
         static public double Interpolation(ICollection<XYDataModel> data, double X) => _interpolation.InterpolationPolynom(data, X);
-        static public ICollection<XYDataModel> FullFill(IInterpolation interpolation, ICollection<XYDataModel> data, double step, double a = 0, double b = 0)
+        static public ICollection<XYDataModel> FullFill(ICollection<XYDataModel> data, double step, double a = 0, double b = 0)
         {
             var x = data.Select(X => X.X).ToList();
             var y = data.Select(Y => Y.Y).ToList();
             if (a == b) { a = x.First(); b = x.Last(); }
             ICollection<XYDataModel> value = new List<XYDataModel>();
-            for (; a <= b; a += step)
-                value.Add(new XYDataModel { X = a, Y = interpolation.InterpolationPolynom(data, a) });
+            for (; a < b; a = Math.Round(a + step, 15))
+                value.Add(new XYDataModel { X = a, Y = _interpolation.InterpolationPolynom(data, a) });
+            value.Add(new XYDataModel { X = a, Y = _interpolation.InterpolationPolynom(data, a) });
             return value;
         }
     }

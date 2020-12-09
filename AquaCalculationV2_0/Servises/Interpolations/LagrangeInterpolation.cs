@@ -20,27 +20,20 @@ namespace AquaCalculationV2_0.Servises.Interpolations
 
             for (int i = 0; i < Size; i++)
             {
-                double temp1 = 1;
-                for (int z = 0; z < Size; z++)
-                {
-                    if (z == i)
-                        continue;
-                    else
-                        temp1 *= (X - x[z]);
-                }
-                double temp2 = 1;
-                for (int z = 0; z < Size; z++)
-                {
-                    if (z == i)
-                        continue;
-                    else
-                        temp2 *= (x[i] - x[z]);
-                }
+                double value = y[i];
 
-                double temp3 = temp1 / temp2;
-                temp3 *= y[i];
+                double upperValue = 1;
+                double lowerValue = 1;
 
-                answer += temp3;
+                for(int j = 0; j < Size; j++)
+                {
+                    if(i != j) 
+                    { 
+                        upperValue *= (X - x[j]);
+                        lowerValue *= (x[i] - x[j]);
+                    }
+                }
+                answer += (value * upperValue / lowerValue);
             }
 
             return answer;

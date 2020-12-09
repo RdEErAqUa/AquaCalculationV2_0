@@ -14,13 +14,30 @@ namespace AquaCalculationV2_0.Servises.Integrals
 
         public ICollection<XYDataModel> Function(ICollection<XYDataModel> data)
         {
-            int m = data.Count / 2;
+            int m = data.Count % 2 == 0 ? data.Count / 2 : data.Count / 2 + 1;
 
-            for(int i = 0; i < m; i++)
+            var x = data.Select(X => X.X).ToList();
+            var y = data.Select(Y => Y.Y).ToList();
+
+            double step = (data.Last().X - data.First().X) / data.Count;
+
+            var answerValue = new List<XYDataModel> { };
+
+            for(int i = 1; i < m; i++)
             {
+                double A = (y[2 * i - 2] - 2 * y[2 * i - 1] + y[2 * i]) / (2.0 * Math.Pow(step, 2.0));
+                double B = (y[2 * i] - y[2 * i - 2])/(2.0 * step);
+                double C = y[2 * i - 1];
+
+                foreach (var el in x) {
+                    if (x[2 * i - 2] <= el && x[2 * i] >= el) {
+                        double yValue = A * Math.Pow(el - x[2 * i - 1], 2.0) + B * (el - x[2 * i - 1]) + C;
+                        answerValue.Add(new XYDataModel { X = el, Y = yValue});
+                    }
+                }
 
             }
-            return null;
+            return answerValue;
         }
 
         public double Integral(ICollection<XYDataModel> xYDatas, double step, double a = 0, double b = 0)

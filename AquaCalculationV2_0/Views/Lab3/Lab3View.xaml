@@ -51,6 +51,15 @@
                 <Button Content="Трансфер данных из интерполирования" Command="{Binding TransferData}" CommandParameter="0"/>
                 <Button Content="Трансфер данных из дифференцирования" Command="{Binding TransferData}" CommandParameter="1"/>
                 <Button Content="Трансфер данных из интегрирования" Command="{Binding TransferData}" CommandParameter="2"/>
+                <TextBlock Text="Функция для заполнения от A до B"/>
+                <TextBox Text="{Binding FunctionValue}"/>
+                <TextBlock Text="A"/>
+                <TextBox Text="{Binding FunctionAValue}"/>
+                <TextBlock Text="B"/>
+                <TextBox Text="{Binding FunctionBValue}"/>
+                <TextBlock Text="Количество елементов"/>
+                <TextBox Text="{Binding FunctionCountValue}"/>
+                <Button Content="Заполнить данные" Command="{Binding FullFillWithFunctionRun}"/>
             </StackPanel>
         </Grid>
         <TabControl Grid.Row="1">
