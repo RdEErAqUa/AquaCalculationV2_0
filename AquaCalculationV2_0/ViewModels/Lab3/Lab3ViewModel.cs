@@ -132,6 +132,14 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
 
         #endregion
 
+        #region NeedIntegralIntervalSecond : double - для метода Гаусса
+
+        private double _NeedIntegralIntervalSecond;
+
+        public double NeedIntegralIntervalSecond { get => _NeedIntegralIntervalSecond; set => Set(ref _NeedIntegralIntervalSecond, value); }
+
+        #endregion
+
         #region NeedIntegralError : double - значение ошибки, которое не должен превысить интеграл на интервале от A до B(для Рунге и остаточного числа)
 
         private double _NeedIntegralError = 0.01;
@@ -161,6 +169,14 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
         public DataModel IntegralValueData { get => _IntegralValueData; set => Set(ref _IntegralValueData, value); }
 
         #endregion
+
+        #region IntegralProtocol : String - протокол, для интегрирования
+        private String _IntegralProtocol;
+
+        public String IntegralProtocol { get => _IntegralProtocol; set => Set(ref _IntegralProtocol, value); }
+
+        #endregion
+
         //Функция для заполнения
         #region FunctionValue : string - функция, для заполнения от A до B
 
@@ -308,6 +324,336 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
             return !isBusyTransferDat;
         }
         #endregion
+        //Определение площади фигур
+        #region FormulaDatas : ObservableCollection<String> - формулы, в пределах которых нужно найти площадь
+
+        private ObservableCollection<FormulaValue> _FormulaDatas;
+
+        public ObservableCollection<FormulaValue> FormulaDatas { get => _FormulaDatas; set => Set(ref _FormulaDatas, value); }
+
+        #endregion
+
+        #region String : SelectedFormula - выбранная формула
+
+        private FormulaValue _SelectedFormula;
+
+        public FormulaValue SelectedFormula { get => _SelectedFormula; set => Set(ref _SelectedFormula, value); }
+
+        #endregion
+
+        #region String : FormulaForAdd - выбранная формула
+
+        private FormulaValue _FormulaForAdd;
+
+        public FormulaValue FormulaForAdd { get => _FormulaForAdd; set => Set(ref _FormulaForAdd, value); }
+
+        #endregion
+
+        #region int : RandomPointCount - количество случайных точек
+
+        private int _RandomPointCount;
+
+        public int RandomPointCount { get => _RandomPointCount; set => Set(ref _RandomPointCount, value); }
+
+        #endregion
+
+        #region DataModel : FormulaData - точки фигуры
+
+        private DataModel _FormulaData;
+
+        public DataModel FormulaData { get => _FormulaData; set => Set(ref _FormulaData, value); }
+
+        #endregion
+
+        #region DataModelPoint : RandomPointValue - случайные точки
+
+        private DataModelChecked _RandomPointValue;
+
+        public DataModelChecked RandomPointValue { get => _RandomPointValue; set => Set(ref _RandomPointValue, value); }
+
+        #endregion
+
+        #region DataModelPoint : RandomPointApproved - случайные точки
+
+        private DataModelChecked _RandomPointApproved;
+
+        public DataModelChecked RandomPointApproved { get => _RandomPointApproved; set => Set(ref _RandomPointApproved, value); }
+
+        #endregion
+
+        #region DataModel : RandomPointPerCount - количество Y елементов в зоне на всего количество елементов X
+
+        private DataModel _RandomPointPerCount;
+
+        public DataModel RandomPointPerCount { get => _RandomPointPerCount; set => Set(ref _RandomPointPerCount, value); }
+
+        #endregion
+
+        #region DataModel : RandomPointSPerCount - количество Y елементов в зоне на всего количество елементов X
+
+        private DataModel _RandomPointSPerCount;
+
+        public DataModel RandomPointSPerCount { get => _RandomPointSPerCount; set => Set(ref _RandomPointSPerCount, value); }
+
+        #endregion
+
+        #region DataModel : _AAveragePlus - Середньоквадратичне відхилення додатнье
+
+        private DataModel _AAveragePlus;
+
+        public DataModel AAveragePlus { get => _AAveragePlus; set => Set(ref _AAveragePlus, value); }
+
+        #endregion
+
+        #region DataModel : AAverage - Середньоквадратичне відхилення відємне
+
+        private DataModel _AAverageMinus;
+
+        public DataModel AAverageMinus { get => _AAverageMinus; set => Set(ref _AAverageMinus, value); }
+
+        #endregion
+
+        #region DataModel : FormulaDataMaxMin - точки ограничивающей фигуры
+
+        private DataModel _FormulaDataMaxMin;
+
+        public DataModel FormulaDataMaxMin { get => _FormulaDataMaxMin; set => Set(ref _FormulaDataMaxMin, value); }
+
+        #endregion
+
+        #region FiguraDataRun -  интерполирование функции
+
+        private bool _isBusyFigureRun;
+        public bool isBusyFigureRun
+        {
+            get => _isBusyFigureRun;
+            private set => Set(ref _isBusyFigureRun, value);
+        }
+
+        public ICommand FiguraDataRun { get; }
+        private async Task OnFiguraDataRunExecuted(object p)
+        {
+            if (FormulaForAdd.Formula == null) return;
+            try
+            {
+                isBusyFigureRun = true;
+                await Task.Run(() =>
+                {
+                    var tempValue = FormulaDatas != null ? new ObservableCollection<FormulaValue>(FormulaDatas) : new ObservableCollection<FormulaValue> { };
+                    switch (Int32.Parse((string)p))
+                    {
+                        case 0:
+                            tempValue.Add(new FormulaValue { Formula = FormulaForAdd.Formula, A = FormulaForAdd.A, B = FormulaForAdd.B });
+                            FormulaDatas = tempValue;
+                            break;
+                        case 1:
+                            tempValue.Remove(SelectedFormula);
+                            FormulaDatas = tempValue;
+                            break;
+                    }
+                });
+            }
+            finally
+            {
+                isBusyFigureRun = false;
+            }
+        }
+
+        private bool CanFiguraDataRunExecute(object p)
+        {
+            return !isBusyFigureRun;
+        }
+        #endregion
+
+        #region BuildFigureRun -  построить фигуры
+
+        private bool _isBusyBuildFigureRun;
+        public bool isBusyBuildFigureRun
+        {
+            get => _isBusyBuildFigureRun;
+            private set => Set(ref _isBusyBuildFigureRun, value);
+        }
+
+        public ICommand BuildFigureRun { get; }
+        private async Task OnBuildFigureRunExecuted(object p)
+        {
+            if (FormulaDatas == null) return;
+            try
+            {
+                isBusyBuildFigureRun = true;
+                await Task.Run(() =>
+                {
+                    var tempValue = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
+                    double step = 0;
+                    double a = FormulaDatas.Select(X => X.A).ToList().Min(), b = FormulaDatas.Select(X => X.B).ToList().Max();
+                    step = (b - a) / FunctionCountValue;
+                    foreach (var el in FormulaDatas)
+                    {
+                        Argument x = new Argument($"x = 0");
+
+                        Expression ex = new Expression(el.Formula, x);
+
+                        for (double i = a; i <= b; i = Math.Round(i + step, 15))
+                        {
+                            x.setArgumentValue(i);
+
+                            if(!Double.IsNaN(ex.calculate()) && (el.A <= i && el.B >= i))
+                                tempValue.XYValue.Add(new XYDataModel { X = i, Y = ex.calculate() });
+                        }
+                    }
+                    var tempValueMaxMin = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
+
+                    double maxY = tempValue.XYValue.Select(Y => Y.Y).ToList().Max();
+                    double minY = tempValue.XYValue.Select(Y => Y.Y).ToList().Min();
+
+                    double maxX = tempValue.XYValue.Select(X => X.X).ToList().Max();
+                    double minX = tempValue.XYValue.Select(X => X.X).ToList().Min();
+
+                    tempValueMaxMin.XYValue.Add( new XYDataModel { X = minX, Y = minY});
+                    tempValueMaxMin.XYValue.Add(new XYDataModel { X = minX, Y = maxY });
+                    tempValueMaxMin.XYValue.Add(new XYDataModel { X = maxX, Y = maxY });
+                    tempValueMaxMin.XYValue.Add(new XYDataModel { X = maxX, Y = minY });
+                    tempValueMaxMin.XYValue.Add(new XYDataModel { X = minX, Y = minY });
+
+                    FormulaDataMaxMin = tempValueMaxMin;
+
+                    FormulaData = tempValue;
+                });
+            }
+            finally
+            {
+                isBusyBuildFigureRun = false;
+            }
+        }
+
+        private bool CanBuildFigureRunExecute(object p)
+        {
+            return !isBusyBuildFigureRun;
+        }
+        #endregion
+
+        #region S : double - площа фигуры
+
+        private double _SValue;
+        public double SValue
+        {
+            get => _SValue;
+            set => Set(ref _SValue, value);
+        }
+
+        #endregion
+
+        #region SValueApproved : double - точная площадь фигуры
+
+        private double _SValueApproved;
+        public double SValueApproved
+        {
+            get => _SValueApproved;
+            set => Set(ref _SValueApproved, value);
+        }
+
+        #endregion
+
+        #region FindSRun -  найти площадь
+
+        private bool _isBusyBFindSRun;
+        public bool isBusyBFindSRun
+        {
+            get => _isBusyBFindSRun;
+            private set => Set(ref _isBusyBFindSRun, value);
+        }
+
+        public ICommand FindSRun { get; }
+        private async Task OnFindSRunExecuted(object p)
+        {
+            if (RandomPointCount <= 0 || FormulaDataMaxMin == null || FormulaDataMaxMin.XYValue.Count < 0) return;
+            try
+            {
+                isBusyBFindSRun = true;
+                await Task.Run(() =>
+                {
+                    double maxY = FormulaDataMaxMin.XYValue.Select(Y => Y.Y).ToList().Max();
+                    double minY = FormulaDataMaxMin.XYValue.Select(Y => Y.Y).ToList().Min();
+
+                    double maxX = FormulaDataMaxMin.XYValue.Select(X => X.X).ToList().Max();
+                    double minX = FormulaDataMaxMin.XYValue.Select(X => X.X).ToList().Min();
+
+                    var temp = new DataModelChecked { XYValue = new ObservableCollection<XYDataModelIsChecked> { } };
+
+                    Random rand = new Random();
+                    double a = FormulaDatas.Select(X => X.A).ToList().Min(), b = FormulaDatas.Select(X => X.B).ToList().Max();
+                    double ErrorValue = (b - a) / FunctionCountValue * 0.5;
+                    var tempDataPerCount = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
+                    for (int j = 0; j < RandomPointCount; j++)
+                    {
+                        var x = rand.NextDouble() * (maxX - minX) + minX;
+                        var y = rand.NextDouble() * (maxY - minY) + minY;
+
+                        temp.XYValue.Add(new XYDataModelIsChecked { X = x, Y = y, IsChecked = false });
+
+                        var allY = FormulaData.XYValue.Where(X => X.X < temp.XYValue.Last().X + ErrorValue && X.X > temp.XYValue.Last().X - ErrorValue).Select(X => X.Y).ToList();
+
+                        allY.Sort();
+                        var allY2 = FormulaData.XYValue.Where(X => X.X < temp.XYValue.Last().X + ErrorValue && X.X > temp.XYValue.Last().X - ErrorValue).ToList();
+
+                        for (int i = 0; i < allY.Count - 1; i++)
+                        {
+                            if (i % 2 == 0 && allY[i] < temp.XYValue.Last().Y && allY[i + 1] > temp.XYValue.Last().Y)
+                            {
+                                temp.XYValue.Last().IsChecked = true;
+                                break;
+                            }
+                            else if (i % 2 == 1 && allY[i] < temp.XYValue.Last().Y && allY[i + 1] > temp.XYValue.Last().Y)
+                            {
+                                temp.XYValue.Last().IsChecked = false;
+                                break;
+                            }
+                        }
+                        tempDataPerCount.XYValue.Add(new XYDataModel { X = j, Y = temp.XYValue.Where(X => X.IsChecked).ToList().Count });
+                    }
+                    RandomPointPerCount = tempDataPerCount;
+                    RandomPointValue = new DataModelChecked { XYValue = new ObservableCollection<XYDataModelIsChecked>(temp.XYValue.Where(X => !X.IsChecked).ToList()) };
+                    RandomPointApproved = new DataModelChecked { XYValue = new ObservableCollection<XYDataModelIsChecked>(temp.XYValue.Where(X => X.IsChecked).ToList()) };
+
+                    double XValueData = (FormulaDataMaxMin.XYValue.Select(X => X.X).ToList().Max() - FormulaDataMaxMin.XYValue.Select(X => X.X).ToList().Min());
+                    double YValueData = FormulaDataMaxMin.XYValue.Select(X => X.Y).ToList().Max() - FormulaDataMaxMin.XYValue.Select(X => X.Y).ToList().Min();
+
+                    double S = XValueData * YValueData;
+
+                    var tempValueZR = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
+                    foreach (var el in RandomPointPerCount.XYValue)
+                    {
+                        double AValue = (el.Y / el.X) * S;
+
+                        double deltaValue = (AValue - SValueApproved) / SValueApproved;
+
+                        tempValueZR.XYValue.Add(new XYDataModel { X = el.X, Y = deltaValue });
+                    }
+                    RandomPointSPerCount = tempValueZR;
+                    SValue = (RandomPointPerCount.XYValue.Select(X => X.Y).ToList().Max() / RandomPointPerCount.XYValue.Select(X => X.X).ToList().Max()) * S;
+
+                    var temp2 = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
+                    var temp3 = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
+                    foreach (var el in RandomPointSPerCount.XYValue)
+                    {
+                        temp2.XYValue.Add(new XYDataModel { X = el.X, Y = (3 / Math.Sqrt(el.X)) });
+                        temp3.XYValue.Add(new XYDataModel { X = el.X, Y = -(3 / Math.Sqrt(el.X)) });
+                    }
+                    AAveragePlus = temp2;
+                    AAverageMinus = temp3;
+                });
+            }
+            finally
+            {
+                isBusyBFindSRun = false;
+            }
+        }
+
+        private bool CanFindSRunExecute(object p)
+        {
+            return !isBusyBFindSRun;
+        }
+        #endregion
         //
         #region InterpolationRun -  интерполирование функции
 
@@ -445,14 +791,25 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
 
                             IntegralValue = IntegralMath.Integral(XYValueData, step, NeedIntegralAValue, NeedIntegralBValue);
                             IntegralValueData = new DataModel { XYValue = new ObservableCollection<XYDataModel>(IntegralMath.Function(XYValueData)) };
+                            IntegralProtocol = $"При количестве узлов - {NeedIntegralInterval}: \n" + IntegralMath.ProtocolBuild(XYValueData, step, NeedIntegralAValue, NeedIntegralBValue);
                             break;
                         //Случай интегрирование с шагом Рунге
                         case 1:
                             IntegralValue = IntegralMath.IntegralWithRunge(DataValue.XYValue, NeedIntegralAValue, NeedIntegralBValue, NeedIntegralError).Value;
+                            IntegralProtocol = $"При E - {NeedIntegralError}: \n" + IntegralMath.IntegralWithRungeProtocol(DataValue.XYValue, NeedIntegralAValue, NeedIntegralBValue, NeedIntegralError);
                             break;
                         //Случай интегрирование с шагом остаточного числа
                         case 2:
                             IntegralValue = IntegralMath.IntegralWithError(DataValue.XYValue, NeedIntegralAValue, NeedIntegralBValue, NeedIntegralError).Value;
+                            break;
+                        //Интегрирование Гаусса
+                        case 3:
+                            double QuadriticValue = NeedIntegralInterval;
+                            IntegralValue = IntegralMath.Integral(DataValue.XYValue, QuadriticValue, NeedIntegralAValue, NeedIntegralBValue);
+                            IntegralProtocol = IntegralMath.ProtocolBuild(DataValue.XYValue, QuadriticValue, NeedIntegralAValue, NeedIntegralBValue);
+                            QuadriticValue = NeedIntegralIntervalSecond;
+                            IntegralValue = IntegralMath.Integral(DataValue.XYValue, QuadriticValue, NeedIntegralAValue, NeedIntegralBValue);
+                            IntegralProtocol +=  "\n" + IntegralMath.ProtocolBuild(DataValue.XYValue, QuadriticValue, NeedIntegralAValue, NeedIntegralBValue);
                             break;
                     }
                 });
@@ -537,11 +894,16 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
             integralDatas.Add(new IntegralData { dataValue = new IntegralRectangles(), methodName = "Метод прямокутника" });
             integralDatas.Add(new IntegralData { dataValue = new IntegralTrapezoid(), methodName = "Метод трапецій" });
             integralDatas.Add(new IntegralData { dataValue = new IntegralSimpson(), methodName = "Метод Сімпсона" });
+            integralDatas.Add(new IntegralData { dataValue = new IntegralGaussian(), methodName = "Метод Гаусса" });
         }
 
         public Lab3ViewModel()
         {
             ConfigureData();
+            FormulaForAdd = new FormulaValue();
+            FindSRun = new AsyncLambdaCommand(OnFindSRunExecuted, CanFindSRunExecute);
+            BuildFigureRun = new AsyncLambdaCommand(OnBuildFigureRunExecuted, CanBuildFigureRunExecute);
+            FiguraDataRun = new AsyncLambdaCommand(OnFiguraDataRunExecuted, CanFiguraDataRunExecute);
             TransferData = new AsyncLambdaCommand(OnTransferDataExecuted, CanTransferDataExecute);
             FullFillWithFunctionRun = new AsyncLambdaCommand(OnFullFillWithFunctionRunExecuted, CanFullFillWithFunctionRunExecute);
             DifferentiationRun = new AsyncLambdaCommand(OnDifferentiationRunExecuted, CanDifferentiationRunExecute);

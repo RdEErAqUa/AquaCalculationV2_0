@@ -49,5 +49,23 @@ namespace AquaCalculationV2_0.Servises.Integrals
 
             return (integralValue * step);
         }
+
+        public string ProtocolBuild(ICollection<XYDataModel> xYDatas, double step, double a = 0, double b = 0)
+        {
+            String Protocol = $"Метод прямоугольников: При шаге интегрирования - {step}, та интервале интегрирования  - {{{a},{b}}} интеграл - ";
+
+            if (a == b) { a = xYDatas.Select(X => X.X).ToList().Min(); b = xYDatas.Select(X => X.X).ToList().Max(); }
+            double integralValue = 0;
+
+            ICollection<XYDataModel> value = xYDatas.Where(x => a <= x.X && b >= x.X).ToList();
+
+            for (int i = 0; i < value.Count - 1; i++)
+                integralValue += value.ElementAt(i).Y;
+            integralValue *= step;
+
+            Protocol += $"{integralValue}\n";
+
+            return Protocol;
+        }
     }
 }
