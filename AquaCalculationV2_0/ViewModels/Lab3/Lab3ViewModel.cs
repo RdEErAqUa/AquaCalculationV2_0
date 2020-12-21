@@ -19,6 +19,7 @@ using AquaCalculationV2_0.Servises.Interpolations.Interfaces;
 using AquaCalculationV2_0.Servises.Interpolations;
 using AquaCalculationV2_0.Models.RepresentedData;
 using AquaCalculationV2_0.Servises.Interpolations.Bezier;
+using AquaCalculationV2_0.Models.Integral.Cubatures;
 
 namespace AquaCalculationV2_0.ViewModels.Lab3
 {
@@ -465,6 +466,23 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
         }
         #endregion
 
+        //Двойной интеграл
+
+        #region Cubature : Cubature - кубатурная формула
+
+        private Cubature _Cubature;
+
+        public Cubature Cubature { get => _Cubature; set => Set(ref _Cubature, value); }
+        #endregion
+
+        #region CubatureValue : double - кубатурная формула значение
+
+        private double _CubatureValue;
+
+        public double CubatureValue { get => _CubatureValue; set => Set(ref _CubatureValue, value); }
+        #endregion
+        //
+
         #region BuildFigureRun -  построить фигуры
 
         private bool _isBusyBuildFigureRun;
@@ -552,6 +570,40 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
             set => Set(ref _SValueApproved, value);
         }
 
+        #endregion
+
+        #region FindDoubleIntegral -  найти площадь
+
+        private bool _isBusyFindDoubleIntegral;
+        public bool isBusyFindDoubleIntegral
+        {
+            get => _isBusyFindDoubleIntegral;
+            private set => Set(ref _isBusyFindDoubleIntegral, value);
+        }
+
+        public ICommand FindDoubleIntegral { get; }
+        private async Task OnFindDoubleIntegralExecuted(object p)
+        {
+            try
+            {
+                isBusyFindDoubleIntegral = true;
+                await Task.Run(() =>
+                {
+                    CubatureValue = Cubature.Integral();
+
+                    int x = 0;
+                });
+            }
+            finally
+            {
+                isBusyFindDoubleIntegral = false;
+            }
+        }
+
+        private bool CanFindDoubleIntegralExecute(object p)
+        {
+            return !isBusyFindDoubleIntegral;
+        }
         #endregion
 
         #region FindSRun -  найти площадь
@@ -801,6 +853,7 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
                         //Случай интегрирование с шагом остаточного числа
                         case 2:
                             IntegralValue = IntegralMath.IntegralWithError(DataValue.XYValue, NeedIntegralAValue, NeedIntegralBValue, NeedIntegralError).Value;
+                            IntegralProtocol = $"При E - {NeedIntegralError}: \n" + IntegralMath.IntegralWithErrorProtocol(DataValue.XYValue, NeedIntegralAValue, NeedIntegralBValue, NeedIntegralError);
                             break;
                         //Интегрирование Гаусса
                         case 3:
@@ -882,6 +935,7 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
 
             differentiationDatas.Add(new DifferentiationData { dataValue = new NewtonFirstDifferentiation(), methodName = "Перший многочлен Ньютона" });
             differentiationDatas.Add(new DifferentiationData { dataValue = new NewtonSecondDifferentiation(), methodName = "Другий многочлен Ньютона" });
+            differentiationDatas.Add(new DifferentiationData { dataValue = new BesselDifferentiation(), methodName = "Функция Бесселя" });
             interpolationDatas.Add(new InterpolationData { dataValue = new LagrangeInterpolation(), methodName = "Метод Лагранжа" });
             interpolationDatas.Add(new InterpolationData { dataValue = new NewtonFirstInterpolation(), methodName = "Перший многочлен Ньютона " });
             interpolationDatas.Add(new InterpolationData { dataValue = new NewtonSecondInterpolation(), methodName = "Другий многочлен Ньютона" });
@@ -901,6 +955,9 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
         {
             ConfigureData();
             FormulaForAdd = new FormulaValue();
+
+            Cubature = new Cubature();
+            FindDoubleIntegral = new AsyncLambdaCommand(OnFindDoubleIntegralExecuted, CanFindDoubleIntegralExecute);
             FindSRun = new AsyncLambdaCommand(OnFindSRunExecuted, CanFindSRunExecute);
             BuildFigureRun = new AsyncLambdaCommand(OnBuildFigureRunExecuted, CanBuildFigureRunExecute);
             FiguraDataRun = new AsyncLambdaCommand(OnFiguraDataRunExecuted, CanFiguraDataRunExecute);

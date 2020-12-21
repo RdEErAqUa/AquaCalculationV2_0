@@ -377,7 +377,73 @@
                     </DockPanel>
                 </Grid>
             </TabItem>
+            <TabItem Header="Кубатурная формула">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <TabControl>
+                        <TabItem Header="Таблица">
+                            <DataGrid Grid.Column="0" ItemsSource="{Binding Cubature.ElementValue}"  AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn IsReadOnly="False" Header="X" Binding="{Binding X}" Width="*"/>
+                                    <DataGridTextColumn IsReadOnly="False" Header="Y" Binding="{Binding Y}" Width="*"/>
+                                    <DataGridTextColumn IsReadOnly="False" Header="Z" Binding="{Binding Z}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem Header="График">
+                            <oxy:Plot>
+                                <oxy:Plot.Axes>
+                                    <oxy:LinearAxis Position="Left"/>
+                                    <oxy:LinearAxis Position="Bottom"/>
+                                </oxy:Plot.Axes>
+                                <oxy:LineSeries Color="Black"
+                                                ItemsSource="{Binding Cubature.UpperFunction.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                                <oxy:LineSeries Color="Green"
+                                                ItemsSource="{Binding Cubature.LowerFunction.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                                <oxy:ScatterErrorSeries Color="Green"
+                                                ItemsSource="{Binding Cubature.Function.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                            </oxy:Plot>
+                        </TabItem>
+                    </TabControl>
+                    <DockPanel Grid.Column="1">
+                        <CheckBox DockPanel.Dock="Top" IsChecked="{Binding isBusyFigureRun, Mode=OneWay}" IsEnabled="False" Content="Занятось функции"/>
+                        <TabControl Grid.Column="1">
+                            <TabItem Header="Задать фигуру">
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="A значение"/>
+                                    <TextBox Text="{Binding Cubature.A}"/>
+                                    <TextBlock Text="B значение"/>
+                                    <TextBox Text="{Binding Cubature.B}"/>
+                                    <TextBlock Text="A формула"/>
+                                    <TextBox Text="{Binding Cubature.AFormula}"/>
+                                    <TextBlock Text="B формула"/>
+                                    <TextBox Text="{Binding Cubature.BFormula}"/>
+                                    <TextBlock Text="f(x, y) = "/>
+                                    <TextBox Text="{Binding Cubature.FXY}"/>
+                                    <TextBlock Text="Кількість вузлів по X"/>
+                                    <TextBox Text="{Binding Cubature.NX}"/>
+                                    <TextBlock Text="Кількість вузлів по Y"/>
+                                    <TextBox Text="{Binding Cubature.NY}"/>
+                                    <TextBlock Text="Значение точности(от 1, до 7)"/>
+                                    <TextBox Text="{Binding Cubature.AccuracyValue}"/>
+                                    <TextBlock Text="Значение интеграла"/>
+                                    <TextBox Text="{Binding CubatureValue}" IsReadOnly="True"/>
+                                    <Button Content="Найти интеграл" Command="{Binding FindDoubleIntegral}"/>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
         </TabControl>
-        
     </Grid>
 </UserControl>
