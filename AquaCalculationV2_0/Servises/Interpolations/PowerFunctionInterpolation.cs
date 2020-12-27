@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AquaCalculationV2_0.Servises.Interpolations
 {
-    class LinearAproximation : IInterpolation
+    class PowerFunctionInterpolation : IInterpolation
     {
         public double InterpolationPolynom(ICollection<XYDataModel> data, double X)
         {
@@ -19,19 +19,19 @@ namespace AquaCalculationV2_0.Servises.Interpolations
 
             for (int i = 0; i < x.Count; i++)
             {
-                SX += x[i];
-                SXX += Math.Pow(x[i], 2);
-                SY += y[i];
-                SXY += (y[i] * x[i]);
+                SX += Math.Log(x[i]);
+                SXX += Math.Pow(Math.Log(x[i]), 2);
+                SY += Math.Log(y[i]);
+                SXY += (Math.Log(y[i]) * Math.Log(x[i]));
             }
             double delta = (x.Count) * SXX - Math.Pow(SX, 2);
             double deltaA = (x.Count) * SXY - SX * SY;
             double deltaB = SXX * SY - SX * SXY;
 
             double a = deltaA / delta;
-            double b = deltaB / delta;
+            double b = Math.Exp(deltaB / delta);
 
-            return a * X + b;
+            return b * Math.Pow(X, a);
         }
     }
 }

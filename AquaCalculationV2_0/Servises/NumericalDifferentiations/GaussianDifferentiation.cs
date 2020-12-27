@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AquaCalculationV2_0.Servises.NumericalDifferentiations
 {
-    class NewtonFirstDifferentiation : INumericalDifferentiation
+    class GaussianDifferentiation : INumericalDifferentiation
     {
         private List<List<double>> FindDelY(List<double> y, int power = 0)
         {
@@ -72,13 +72,12 @@ namespace AquaCalculationV2_0.Servises.NumericalDifferentiations
                             f1 += delY[i][tempt];
                             break;
                         case 1:
-                            f1 += ((2.0 * q - 1) / 2.0 * (delY[i][tempt]));
+                            if (tempt - 1 < 0) continue;
+                            f1 += ((2.0 * q - 1) / 2.0 * (delY[i][tempt - 1]));
                             break;
                         case 2:
-                            f1 += ((3.0 * Math.Pow(q, 2.0) - 6.0 * q + 2) / 6.0 * (delY[i][tempt]));
-                            break;
-                        case 3:
-                            f1 += ((2.0 * Math.Pow(q, 3.0) - 9.0 * Math.Pow(q, 2.0) + 11.0 * q - 3) / 12.0 * (delY[i][tempt]));
+                            if (tempt - 1 < 0) continue;
+                            f1 += ((3.0 * Math.Pow(q, 2.0) - 1) / 6.0 * (delY[i][tempt - 1]));
                             break;
                     }
                 }
@@ -86,6 +85,7 @@ namespace AquaCalculationV2_0.Servises.NumericalDifferentiations
             f1 *= (1.0 / h);
             return f1;
         }
+
         public double Error(ICollection<XYDataModel> DataValue, double step)
         {
             throw new NotImplementedException();

@@ -84,7 +84,7 @@
                                     <oxy:LinearAxis Position="Left"/>
                                     <oxy:LinearAxis Position="Bottom"/>
                                 </oxy:Plot.Axes>
-                                <oxy:LineSeries Color="Green"
+                                <oxy:ScatterErrorSeries Color="Green"
                                                 ItemsSource="{Binding DataValue.XYValue}"
                                                 DataFieldX="X"
                                                 DataFieldY="Y"/>
@@ -154,8 +154,10 @@
                                     <Button Content="Вычислить" Command="{Binding DifferentiationRun}" CommandParameter="0"/>
                                     <TextBlock Text="Число, для дифференцирования X* - "/>
                                     <TextBox Text="{Binding NeedDifferentiationValue}"/>
-                                    <TextBlock Text="Значение X* - "/>
+                                    <TextBlock Text="Значение f`(X*)  - "/>
                                     <TextBox Text="{Binding DifferentiationValue}" IsEnabled="False"/>
+                                    <TextBlock Text="Значение f``(X*) - "/>
+                                    <TextBox Text="{Binding DoubleDifferentiationValue}" IsEnabled="False"/>
                                 </StackPanel>
                             </TabItem>
                             <TabItem Header="Дифференцирование с шагом">
@@ -400,47 +402,91 @@
                                     <oxy:LinearAxis Position="Bottom"/>
                                 </oxy:Plot.Axes>
                                 <oxy:LineSeries Color="Black"
-                                                ItemsSource="{Binding Cubature.UpperFunction.XYValue}"
+                                                ItemsSource="{Binding Cubature.FunctionErrorX.XYValue}"
                                                 DataFieldX="X"
                                                 DataFieldY="Y"/>
                                 <oxy:LineSeries Color="Green"
-                                                ItemsSource="{Binding Cubature.LowerFunction.XYValue}"
-                                                DataFieldX="X"
-                                                DataFieldY="Y"/>
-                                <oxy:ScatterErrorSeries Color="Green"
-                                                ItemsSource="{Binding Cubature.Function.XYValue}"
+                                                ItemsSource="{Binding Cubature.FunctionErrorY.XYValue}"
                                                 DataFieldX="X"
                                                 DataFieldY="Y"/>
                             </oxy:Plot>
                         </TabItem>
                     </TabControl>
                     <DockPanel Grid.Column="1">
-                        <CheckBox DockPanel.Dock="Top" IsChecked="{Binding isBusyFigureRun, Mode=OneWay}" IsEnabled="False" Content="Занятось функции"/>
-                        <TabControl Grid.Column="1">
-                            <TabItem Header="Задать фигуру">
-                                <StackPanel Grid.Column="1">
-                                    <TextBlock Text="A значение"/>
-                                    <TextBox Text="{Binding Cubature.A}"/>
-                                    <TextBlock Text="B значение"/>
-                                    <TextBox Text="{Binding Cubature.B}"/>
-                                    <TextBlock Text="A формула"/>
-                                    <TextBox Text="{Binding Cubature.AFormula}"/>
-                                    <TextBlock Text="B формула"/>
-                                    <TextBox Text="{Binding Cubature.BFormula}"/>
-                                    <TextBlock Text="f(x, y) = "/>
-                                    <TextBox Text="{Binding Cubature.FXY}"/>
-                                    <TextBlock Text="Кількість вузлів по X"/>
-                                    <TextBox Text="{Binding Cubature.NX}"/>
-                                    <TextBlock Text="Кількість вузлів по Y"/>
-                                    <TextBox Text="{Binding Cubature.NY}"/>
-                                    <TextBlock Text="Значение точности(от 1, до 7)"/>
-                                    <TextBox Text="{Binding Cubature.AccuracyValue}"/>
-                                    <TextBlock Text="Значение интеграла"/>
-                                    <TextBox Text="{Binding CubatureValue}" IsReadOnly="True"/>
-                                    <Button Content="Найти интеграл" Command="{Binding FindDoubleIntegral}"/>
-                                </StackPanel>
-                            </TabItem>
-                        </TabControl>
+                        <CheckBox DockPanel.Dock="Top" IsChecked="{Binding isBusyFindDoubleIntegral, Mode=OneWay}" IsEnabled="False" Content="Занятось функции"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="A значение"/>
+                            <TextBox Text="{Binding Cubature.A}"/>
+                            <TextBlock Text="B значение"/>
+                            <TextBox Text="{Binding Cubature.B}"/>
+                            <TextBlock Text="A формула"/>
+                            <TextBox Text="{Binding Cubature.AFormula}"/>
+                            <TextBlock Text="B формула"/>
+                            <TextBox Text="{Binding Cubature.BFormula}"/>
+                            <TextBlock Text="f(x, y) = "/>
+                            <TextBox Text="{Binding Cubature.FXY}"/>
+                            <TextBlock Text="Кількість вузлів по X"/>
+                            <TextBox Text="{Binding Cubature.NX}"/>
+                            <TextBlock Text="Кількість вузлів по Y"/>
+                            <TextBox Text="{Binding Cubature.NY}"/>
+                            <TextBlock Text="Значение точности(от 1, до 7)"/>
+                            <TextBox Text="{Binding Cubature.AccuracyValue}"/>
+                            <TextBlock Text="Точное значение интеграла"/>
+                            <TextBox Text="{Binding Cubature.IntegralValueRight}"/>
+                            <TextBlock Text="Значение интеграла"/>
+                            <TextBox Text="{Binding CubatureValue}" IsReadOnly="True"/>
+                            <Button Content="Найти интеграл" Command="{Binding FindDoubleIntegral}"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Метод квадратних сум">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <TabControl>
+                        <TabItem Header="Таблица">
+                            <DataGrid Grid.Column="0" ItemsSource="{Binding Fredgolma.DataModel.XYValue}"  AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn IsReadOnly="False" Header="X" Binding="{Binding X}" Width="*"/>
+                                    <DataGridTextColumn IsReadOnly="False" Header="Y" Binding="{Binding Y}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem Header="График">
+                            <oxy:Plot>
+                                <oxy:Plot.Axes>
+                                    <oxy:LinearAxis Position="Left"/>
+                                    <oxy:LinearAxis Position="Bottom"/>
+                                </oxy:Plot.Axes>
+                                <oxy:LineSeries Color="Black"
+                                                ItemsSource="{Binding Fredgolma.DataModel.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                            </oxy:Plot>
+                        </TabItem>
+                    </TabControl>
+                    <DockPanel Grid.Column="1">
+                        <CheckBox DockPanel.Dock="Top" IsChecked="{Binding isBusyIntegralValueSimpson, Mode=OneWay}" IsEnabled="False" Content="Занятось функции"/>
+                        <StackPanel>
+                            <TextBlock Text="y(x) - I(f(x)*y(s)) = f(x)"/>
+                            <TextBlock Text="Интеграл K(x,s) - "/>
+                            <TextBox Text="{Binding Fredgolma.IntegralFunctionLine}"/>
+                            <TextBlock Text="A - "/>
+                            <TextBox Text="{Binding Fredgolma.A}"/>
+                            <TextBlock Text="B - "/>
+                            <TextBox Text="{Binding Fredgolma.B}"/>
+                            <TextBlock Text="f(x) - "/>
+                            <TextBox Text="{Binding Fredgolma.FunctionLine}"/>
+                            <TextBlock Text="Точность n - "/>
+                            <TextBox Text="{Binding Fredgolma.ErrorNValue}"/>
+                            <Button Content="Посчитать Симпсона" Command="{Binding IntegralValueSimpson}" CommandParameter="0"/>
+                            <Button Content="Посчитать Трапеций" Command="{Binding IntegralValueSimpson}" CommandParameter="1"/>
+                            <TextBlock Text="Формула, которая получилось - "/>
+                            <TextBox Text="{Binding Fredgolma.AnswerValue}"/>
+                        </StackPanel>
                     </DockPanel>
                 </Grid>
             </TabItem>

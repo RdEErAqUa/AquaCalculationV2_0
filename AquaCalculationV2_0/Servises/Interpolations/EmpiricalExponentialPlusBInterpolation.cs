@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 
 namespace AquaCalculationV2_0.Servises.Interpolations
 {
-    class LinearAproximation : IInterpolation
+    class EmpiricalExponentialPlusBInterpolation : IInterpolation
     {
         public double InterpolationPolynom(ICollection<XYDataModel> data, double X)
         {
             var x = data.Select(X => X.X).ToList();
-            var y = data.Select(Y => Y.Y).ToList();
+            var y = data.Select(Y => Math.Log(Y.Y)).ToList();
+            y.Sort();
 
             double SX = 0, SXX = 0, SY = 0, SXY = 0;
 
@@ -31,7 +32,7 @@ namespace AquaCalculationV2_0.Servises.Interpolations
             double a = deltaA / delta;
             double b = deltaB / delta;
 
-            return a * X + b;
+            return a * Math.Exp(X) + b;
         }
     }
 }

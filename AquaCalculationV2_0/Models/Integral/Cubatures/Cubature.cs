@@ -53,6 +53,12 @@ namespace AquaCalculationV2_0.Models.Integral.Cubatures
         public int NY { get => _NY; set => Set(ref _NY, value);}
         #endregion
 
+        #region IntegralValueRight : double - правильное значение интеграла
+        public double _IntegralValueRight;
+        public double IntegralValueRight { get => _IntegralValueRight; set => Set(ref _IntegralValueRight, value); }
+        #endregion
+
+
         #region
         private ObservableCollection<ThirdDimensionalData> _ElementValue;
 
@@ -77,6 +83,22 @@ namespace AquaCalculationV2_0.Models.Integral.Cubatures
 
         #endregion
 
+        #region DataModel : FunctionErrorX - функция, которая ограничивает сверху
+
+        private DataModel _FunctionErrorX;
+
+        public DataModel FunctionErrorX { get => _FunctionErrorX; set => Set(ref _FunctionErrorX, value); }
+
+        #endregion
+
+        #region DataModel : FunctionErrorY - функция, которая ограничивает сверху
+
+        private DataModel _FunctionErrorY;
+
+        public DataModel FunctionErrorY { get => _FunctionErrorY; set => Set(ref _FunctionErrorY, value); }
+
+        #endregion
+
         #region DataModel : LowerFunction - функция, которая ограничивает снизу
 
         private DataModel _LowerFunction;
@@ -94,8 +116,9 @@ namespace AquaCalculationV2_0.Models.Integral.Cubatures
         #endregion
 
         #endregion
-        public void SetElement()
+        public void SetElement(int nx = 0, int ny = 0)
         {
+            if (nx <= 1 || ny <= 1) { nx = NX; ny = NY; }
             Argument a = new Argument($"x = 0");
             Expression aex = new Expression(AFormula, a);
             Argument b = new Argument($"x = 0");
@@ -109,30 +132,42 @@ namespace AquaCalculationV2_0.Models.Integral.Cubatures
             var l = new DataModel { XYValue = new System.Collections.ObjectModel.ObservableCollection<XYDataModel> { } };
             var fz = new ObservableCollection<ThirdDimensionalData> { };
 
-
-            for (double i = A; i <= B; i += (B - A) / (double)NX)
+            double fxr = A;
+            for (int j = 0; j < nx; j++)
             {
-                a.setArgumentValue(i);
-                b.setArgumentValue(i);
+                a.setArgumentValue(fxr);
+                b.setArgumentValue(fxr);
 
-                u.XYValue.Add(new XYDataModel { X = i, Y = bex.calculate() });
-                l.XYValue.Add(new XYDataModel { X = i, Y = aex.calculate() });
+                u.XYValue.Add(new XYDataModel { X = fxr, Y = bex.calculate() });
+                l.XYValue.Add(new XYDataModel { X = fxr, Y = aex.calculate() });
+                fxr += (B - A) / (double)(nx - 1);
             }
 
             for (int i = 0; i < u.XYValue.Count; i++)
             {
                 fx.setArgumentValue(u.XYValue[i].X);
-                for(double j = l.XYValue[i].Y; j < u.XYValue[i].Y; j += (u.XYValue[i].Y - l.XYValue[i].Y) / NY)
+
+                double step = (u.XYValue[i].Y - l.XYValue[i].Y) / (ny - 1);
+                if (step > 0)
                 {
-                    fy.setArgumentValue(j);
-                    fz.Add(new ThirdDimensionalData { X = l.XYValue[i].X, Y = j, Z = fxyex.calculate() });
+                    double j = l.XYValue[i].Y;
+                    for (int temp1 = 0; temp1 < ny; temp1++)
+                    {
+                        fy.setArgumentValue(j);
+                        fz.Add(new ThirdDimensionalData { X = l.XYValue[i].X, Y = j, Z = fxyex.calculate() });
+                        j += step;
+                    }
+                }
+                else
+                {
+                    fy.setArgumentValue(l.XYValue[i].Y);
+                    fz.Add(new ThirdDimensionalData { X = l.XYValue[i].X, Y = l.XYValue[i].Y, Z = fxyex.calculate() });
                 }
             }
             UpperFunction = u;
             LowerFunction = l;
             ElementValue = fz;
         }
-
         public double Integral()
         {
             if (AccuracyValue <= 0 || AccuracyValue > 8) return 0;
@@ -185,18 +220,100 @@ namespace AquaCalculationV2_0.Models.Integral.Cubatures
 
             return f;
         }
-        public double IntegralFind(ICollection<XYDataModel> xYDatas, double step, double a = 0, double b = 0)
+        public void BuildFunctionError()
         {
-            if (a == b) { a = xYDatas.Select(X => X.X).ToList().Min(); b = xYDatas.Select(X => X.X).ToList().Max(); }
-            double integralValue = 0;
+            var FunctionErrorX = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
+            var FunctionErrorY = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
+            for (int i = 0; i < 100; i++)
+            {
+                FunctionErrorX.XYValue.Add(new XYDataModel { X = i, Y = Math.Abs(IntegralValueRight - CubatureSimpson(30, i)) });
+            }
+            this.FunctionErrorX = FunctionErrorX;
+            for (int i = 0; i < 100; i++)
+            {
+                FunctionErrorY.XYValue.Add(new XYDataModel { X = i, Y = Math.Abs(IntegralValueRight - CubatureSimpson(i, 30)) });
+            }
+            this.FunctionErrorY = FunctionErrorY;
+        }
+        public double CubatureSimpson(int nx = 0, int ny = 0)
+        {
+            if (nx <= 1 || ny <= 1) { nx = NX; ny = NY; }
+            if (AccuracyValue <= 0 || AccuracyValue > 8) return 0;
+            if (AFormula == null || BFormula == null || FXY == null) return 0;
 
-            ICollection<XYDataModel> value = xYDatas.Where(x => a <= x.X && b >= x.X).ToList();
+            SetElement(nx, ny);
 
-            for (int i = 0; i < value.Count; i++)
-                integralValue = (i == 0 || i == value.Count - 1 ? integralValue + value.ElementAt(i).Y :
-                    (i % 2 == 0 ? (integralValue + 2 * xYDatas.ElementAt(i).Y) : (integralValue + 4 * value.ElementAt(i).Y)));
+            Argument a = new Argument($"x = 0");
+            Expression aex = new Expression(AFormula, a);
+            Argument b = new Argument($"x = 0");
+            Expression bex = new Expression(BFormula, b);
 
-            return (integralValue * (step / 3.0));
+            Argument fx = new Argument($"x = 0");
+            Argument fy = new Argument($"y = 0");
+            Expression fxyex = new Expression(FXY, fx, fy);
+
+            double f = 0;
+
+            double MaxY = ElementValue.Select(X => X.Y).Max();
+            double MinY = ElementValue.Select(X => X.Y).Min();
+
+            double HX = (B - A) / (nx - 1);
+            double HY = (MaxY - MinY) / (ny - 1);
+
+            var NewElementValue = new ObservableCollection<ThirdDimensionalData> { };
+            double x = A;
+            //Заполним функцию, которая ограничивает наше значение
+            for (int i = 0; i < nx; i++)
+            {
+                fx.setArgumentValue(x);
+                a.setArgumentValue(x);
+                b.setArgumentValue(x);
+                double y = MinY;
+                for (int j = 0; j < ny; j++)
+                {
+                    fy.setArgumentValue(y);
+                    double value = fxyex.calculate();
+                    if (!Double.IsNaN(value) && !Double.IsInfinity(value) && (bex.calculate() >= y && aex.calculate() <= y))
+                        NewElementValue.Add(new ThirdDimensionalData { X = x, Y = y, Z = value });
+                    else
+                        NewElementValue.Add(new ThirdDimensionalData { X = x, Y = y, Z = 0 });
+                    y += HY;
+                }
+                x += HX;
+            }
+            if (nx * ny != NewElementValue.Count) return -1;
+            //
+            List<double> Q0J = new List<double> { };
+            List<double> Q0I = new List<double> { };
+
+            for(int i = 0; i < nx; i++)
+            {
+                double value = (i == 0 || i == nx - 1 ? 1 :
+                    (i % 2 == 0 ? (2) : (4)));
+                Q0J.Add(value);
+            }
+            for(int i = 0; i < ny; i++)
+            {
+                double value = (i == 0 || i == ny - 1 ? 1 :
+                    (i % 2 == 0 ? (2) : (4)));
+                Q0I.Add(value);
+            }
+ 
+            for (int i = 0; i < nx; i++)
+            {
+                double Ei = NewElementValue.First().X + HX * i; 
+
+                fx.setArgumentValue(Ei);
+
+                for (int j = 0; j < ny; j++)
+                {
+                    f += (Q0J[i] * Q0I[j]) * NewElementValue[i * ny + j].Z;
+                }
+            }
+
+            f *= ((HX * HY) / 9.0);
+
+            return f;
         }
 
         private void MakeQuadratureCoefficients(int n)

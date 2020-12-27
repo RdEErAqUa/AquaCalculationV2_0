@@ -20,6 +20,7 @@ using AquaCalculationV2_0.Servises.Interpolations;
 using AquaCalculationV2_0.Models.RepresentedData;
 using AquaCalculationV2_0.Servises.Interpolations.Bezier;
 using AquaCalculationV2_0.Models.Integral.Cubatures;
+using AquaCalculationV2_0.Models.Integral;
 
 namespace AquaCalculationV2_0.ViewModels.Lab3
 {
@@ -481,8 +482,23 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
 
         public double CubatureValue { get => _CubatureValue; set => Set(ref _CubatureValue, value); }
         #endregion
-        //
+        //Чисто временное хранилище
+        #region DoubleDifferentiationValue : double - кубатурная формула значение
 
+        private double _DoubleDifferentiationValue;
+
+        public double DoubleDifferentiationValue { get => _DoubleDifferentiationValue; set => Set(ref _DoubleDifferentiationValue, value); }
+        #endregion
+        //Фредгольма
+
+        #region Fredgolma : Fredgolma - формула фредгольма
+
+        private Fredgolma _Fredgolma;
+
+        public Fredgolma Fredgolma { get => _Fredgolma; set => Set(ref _Fredgolma, value); }
+        #endregion
+
+        //
         #region BuildFigureRun -  построить фигуры
 
         private bool _isBusyBuildFigureRun;
@@ -589,8 +605,7 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
                 isBusyFindDoubleIntegral = true;
                 await Task.Run(() =>
                 {
-                    CubatureValue = Cubature.Integral();
-
+                    CubatureValue = Cubature.CubatureSimpson();
                     int x = 0;
                 });
             }
@@ -706,6 +721,47 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
             return !isBusyBFindSRun;
         }
         #endregion
+        //IntegralValueSimpson
+        #region IntegralValueSimpson -  интерполирование функции
+
+        private bool _isBusyIntegralValueSimpson;
+        public bool isBusyIntegralValueSimpson
+        {
+            get => _isBusyIntegralValueSimpson;
+            private set => Set(ref _isBusyIntegralValueSimpson, value);
+        }
+
+        public ICommand IntegralValueSimpson { get; }
+        private async Task OnIntegralValueSimpsonExecuted(object p)
+        {
+            try
+            {
+                isBusyIntegralValueSimpson = true;
+                await Task.Run(() =>
+                {
+                    switch (Int32.Parse((string)p))
+                    {
+                        case 0:
+                            Fredgolma.IntegralValueSimpson();
+                            break;
+                        case 1:
+                            Fredgolma.IntegralValueTrapezoid();
+                            break;
+                    }
+                });
+
+            }
+            finally
+            {
+                isBusyIntegralValueSimpson = false;
+            }
+        }
+
+        private bool CanIntegralValueSimpsonExecute(object p)
+        {
+            return !isBusyIntegralValueSimpson;
+        }
+        #endregion
         //
         #region InterpolationRun -  интерполирование функции
 
@@ -730,6 +786,16 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
                         //Случай интерполирования в точке
                         case 0:
                             InterpolationValue = Math.Round(InterpolationMath.Interpolation(DataValue.XYValue, NeedInterpolationValue), 15);
+
+                            var temp1 = InterpolationMath.FullFill(DataValue.XYValue, NeedInterpolationStep);
+                            double step = Math.Abs(DataValue.XYValue[1].X - DataValue.XYValue.First().X);
+                            for (double i = DataValue.XYValue.Last().X; i <= DataValue.XYValue.Last().X + (double)10 * step; i += step * 0.01)
+                            {
+                                double X = i;
+                                temp1.Add(new XYDataModel { X = X, Y = Math.Round(InterpolationMath.Interpolation(DataValue.XYValue, X), 15) });
+                            }
+                            InterpolationValueData = new DataModel { XYValue = new ObservableCollection<XYDataModel>(temp1) };
+
                             break;
                         //Случай интерполирования с шагом
                         case 1:
@@ -775,20 +841,21 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
                         //Случай дифференцирования в точке
                         case 0:
                             DifferentiationValue = Math.Round(DifferentiationMath.Differentiation(DataValue.XYValue, NeedDifferentiationValue).Value, 15);
+
+                            var zero = DifferentiationMath.DifferentiationForEveryNode(DataValue.XYValue, 1);
+
+                            DoubleDifferentiationValue = Math.Round(DifferentiationMath.Differentiation(zero, NeedDifferentiationValue).Value, 15);
                             break;
                         //Случай дифференцирования с шагом
                         case 1:
                             var temp = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
                             for (double a = DataValue.XYValue.First().X; a < DataValue.XYValue.Last().X; a = Math.Round(a + NeedDifferentiationStep, 15))
-                                temp.XYValue.Add(new XYDataModel { X = a, Y = Math.Round(InterpolationMath.Interpolation(DataValue.XYValue, a), 15) });
-                            var temp2 = new DataModel { XYValue = new ObservableCollection<XYDataModel> { } };
-                            foreach (var el in temp.XYValue)
                             {
-                                double? z = DifferentiationMath.Differentiation(temp.XYValue, el.X);
+                                double? z = DifferentiationMath.Differentiation(DataValue.XYValue, a);
                                 if (z != null)
-                                    temp2.XYValue.Add(new XYDataModel { X = el.X, Y = Math.Round(z.Value, 15) });
+                                    temp.XYValue.Add(new XYDataModel { X = a, Y = Math.Round(z.Value, 15) });
                             }
-                            DifferentiationValueData = temp2;
+                            DifferentiationValueData = temp;
                             break;
                         //Случай дифференцирования с шагом Рунге
                         case 2:
@@ -936,19 +1003,25 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
             differentiationDatas.Add(new DifferentiationData { dataValue = new NewtonFirstDifferentiation(), methodName = "Перший многочлен Ньютона" });
             differentiationDatas.Add(new DifferentiationData { dataValue = new NewtonSecondDifferentiation(), methodName = "Другий многочлен Ньютона" });
             differentiationDatas.Add(new DifferentiationData { dataValue = new BesselDifferentiation(), methodName = "Функция Бесселя" });
+            differentiationDatas.Add(new DifferentiationData { dataValue = new GaussianDifferentiation(), methodName = "Функция Гаусса" });
+            differentiationDatas.Add(new DifferentiationData { dataValue = new StirlingDifferentiation(), methodName = "Функция Стирлинга" });
             interpolationDatas.Add(new InterpolationData { dataValue = new LagrangeInterpolation(), methodName = "Метод Лагранжа" });
             interpolationDatas.Add(new InterpolationData { dataValue = new NewtonFirstInterpolation(), methodName = "Перший многочлен Ньютона " });
             interpolationDatas.Add(new InterpolationData { dataValue = new NewtonSecondInterpolation(), methodName = "Другий многочлен Ньютона" });
             interpolationDatas.Add(new InterpolationData { dataValue = new CubicSplineInterpolation(), methodName = "Кубический  сплайн" });
+            interpolationDatas.Add(new InterpolationData { dataValue = new TrigonometricInterpolation(), methodName = "Тригонометрична інтерполяція" });
             interpolationDatas.Add(new InterpolationData { dataValue = new LinearAproximation(), methodName = "МНК: Линейная" });
+            interpolationDatas.Add(new InterpolationData { dataValue = new EmpricialFunctionAeXB(), methodName = "МНК: Показникова функція" });
+            interpolationDatas.Add(new InterpolationData { dataValue = new PowerFunctionInterpolation(), methodName = "МНК: Степенева функція" });
+            interpolationDatas.Add(new InterpolationData { dataValue = new EmpiricalSinInterpolation(), methodName = "МНК : sin(a + b * x)" });
             interpolationDatas.Add(new InterpolationData { dataValue = new BezierCurveOrder1(), methodName = "Кривая Безье: Степень 1" });
             interpolationDatas.Add(new InterpolationData { dataValue = new BezierCurveOrder2(), methodName = "Кривая Безье: Степень 2" });
             interpolationDatas.Add(new InterpolationData { dataValue = new BezierCurveOrder3(), methodName = "Кривая Безье: Степень 3" });
-
             integralDatas.Add(new IntegralData { dataValue = new IntegralRectangles(), methodName = "Метод прямокутника" });
             integralDatas.Add(new IntegralData { dataValue = new IntegralTrapezoid(), methodName = "Метод трапецій" });
             integralDatas.Add(new IntegralData { dataValue = new IntegralSimpson(), methodName = "Метод Сімпсона" });
             integralDatas.Add(new IntegralData { dataValue = new IntegralGaussian(), methodName = "Метод Гаусса" });
+            integralDatas.Add(new IntegralData { dataValue = new IntegralChebishev(), methodName = "Метод Чебышека" });
         }
 
         public Lab3ViewModel()
@@ -957,6 +1030,8 @@ namespace AquaCalculationV2_0.ViewModels.Lab3
             FormulaForAdd = new FormulaValue();
 
             Cubature = new Cubature();
+            Fredgolma = new Fredgolma();
+            IntegralValueSimpson = new AsyncLambdaCommand(OnIntegralValueSimpsonExecuted, CanIntegralValueSimpsonExecute);
             FindDoubleIntegral = new AsyncLambdaCommand(OnFindDoubleIntegralExecuted, CanFindDoubleIntegralExecute);
             FindSRun = new AsyncLambdaCommand(OnFindSRunExecuted, CanFindSRunExecute);
             BuildFigureRun = new AsyncLambdaCommand(OnBuildFigureRunExecuted, CanBuildFigureRunExecute);

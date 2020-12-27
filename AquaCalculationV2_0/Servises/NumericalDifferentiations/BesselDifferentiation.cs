@@ -61,25 +61,29 @@ namespace AquaCalculationV2_0.Servises.NumericalDifferentiations
 
                 break;
             }
-            if (x.Last() != X && x[x.Count - 2] != X)
+            double f1 = 0;
+            for (int i = 0; i < delY.Count; i++)
             {
-                double f1 = 0;
-                double z = 1;
-                double f = 1;
-                for (int i = 0; i < delY.Count; i++)
+                if (delY[i].Count > tempt && tempt-1 >= 0)
                 {
-                    if (delY[i].Count > tempt)
+                    switch (i)
                     {
-                        f1 += Math.Pow(-1, i) * (delY[i][tempt] / (i + 1));
+                        case 0:
+                            f1 += delY[i][tempt];
+                            break;
+                        case 1:
+                            f1 += ((2.0 * q - 1) / 2.0 * (delY[i][tempt] + delY[i][tempt - 1]) / 2.0);
+                            break;
+                        case 2:
+                            f1 += ((3.0 * Math.Pow(q, 2.0) - 3.0 * q + 0.5) / 6.0 * (delY[i][tempt - 1]));
+                            break;
                     }
-                    z *= z * f;
-                    f *= 0.96798;
                 }
-                f1 *= (1.0 / h);
-                return f1;
             }
-            return null;
+            f1 *= (1.0 / h);
+            return f1;
         }
+
         public double Error(ICollection<XYDataModel> DataValue, double step)
         {
             throw new NotImplementedException();
