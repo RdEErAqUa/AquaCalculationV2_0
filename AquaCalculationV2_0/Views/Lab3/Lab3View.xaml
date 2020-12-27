@@ -17,49 +17,479 @@
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
-            <DataGrid Grid.Column="0" ItemsSource="{Binding IntegralValue.XYValue}" AutoGenerateColumns="False">
+            <DataGrid Grid.Column="0" ItemsSource="{Binding DataValue.XYValue}" AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn IsReadOnly="False" Header="X" Binding="{Binding X}" Width="*"/>
                     <DataGridTextColumn IsReadOnly="False" Header="Y" Binding="{Binding Y}" Width="*"/>
                 </DataGrid.Columns>
             </DataGrid>
-            <DockPanel Grid.Column="1">
-                <Button DockPanel.Dock="Top" Content="Обчислити" Command="{Binding IntegralRun}"/>
-                <TextBlock Text="X значение" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding IntegralCalculated}" DockPanel.Dock="Top"/>
-                <TextBlock Text="A значение" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding A}" DockPanel.Dock="Top"/>
-                <TextBlock Text="B значение" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding B}" DockPanel.Dock="Top"/>
-                <TextBlock Text="Формула" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding FormulaValue}" DockPanel.Dock="Top"/>
-                <TextBlock Text="Максимум вузлів" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding E}" DockPanel.Dock="Top"/>
-                <TextBlock Text="Кількість вузлів" DockPanel.Dock="Top"/>
-                <TextBox Text="{Binding IntegralValue.XYBuild.Count, Mode=OneWay}" DockPanel.Dock="Top"/>
-            </DockPanel>
+            <StackPanel Grid.Column="1">
+                <TextBlock Text="Метод диференціювання"/>
+                <ComboBox ItemsSource="{Binding differentiationDatas}" SelectedItem="{Binding selectedDifferentiationData}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding methodName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock Text="Метод інтерполювання"/>
+                <ComboBox ItemsSource="{Binding interpolationDatas}" SelectedItem="{Binding selectedInterpolationData}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding methodName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <TextBlock Text="Метод інтегрування"/>
+                <ComboBox ItemsSource="{Binding integralDatas}" SelectedItem="{Binding selectedIntegralData}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding methodName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button Content="Трансфер данных из интерполирования" Command="{Binding TransferData}" CommandParameter="0"/>
+                <Button Content="Трансфер данных из дифференцирования" Command="{Binding TransferData}" CommandParameter="1"/>
+                <Button Content="Трансфер данных из интегрирования" Command="{Binding TransferData}" CommandParameter="2"/>
+                <TextBlock Text="Функция для заполнения от A до B"/>
+                <TextBox Text="{Binding FunctionValue}"/>
+                <TextBlock Text="A"/>
+                <TextBox Text="{Binding FunctionAValue}"/>
+                <TextBlock Text="B"/>
+                <TextBox Text="{Binding FunctionBValue}"/>
+                <TextBlock Text="Количество елементов"/>
+                <TextBox Text="{Binding FunctionCountValue}"/>
+                <Button Content="Заполнить данные" Command="{Binding FullFillWithFunctionRun}"/>
+            </StackPanel>
         </Grid>
-        <oxy:Plot Grid.Row="1">
-            <oxy:Plot.Axes>
-                <oxy:LinearAxis Position="Left"/>
-                <oxy:LinearAxis Position="Bottom"/>
-            </oxy:Plot.Axes>
-            <oxy:LineSeries Color="Blue"
-                                                ItemsSource="{Binding IntegralValue.XYValue}"
+        <TabControl Grid.Row="1">
+            <TabItem Header="Интерполирование">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <TabControl>
+                        <TabItem Header="Таблица">
+                            <DataGrid Grid.Column="0" ItemsSource="{Binding InterpolationValueData.XYValue}" AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn IsReadOnly="False" Header="X" Binding="{Binding X}" Width="*"/>
+                                    <DataGridTextColumn IsReadOnly="False" Header="Y" Binding="{Binding Y}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem Header="График">
+                            <oxy:Plot>
+                                <oxy:Plot.Axes>
+                                    <oxy:LinearAxis Position="Left"/>
+                                    <oxy:LinearAxis Position="Bottom"/>
+                                </oxy:Plot.Axes>
+                                <oxy:ScatterErrorSeries Color="Green"
+                                                ItemsSource="{Binding DataValue.XYValue}"
                                                 DataFieldX="X"
                                                 DataFieldY="Y"/>
-            <oxy:LineSeries Color="Green"
-                                                ItemsSource="{Binding IntegralValue.XYBuild}"
+                                <oxy:LineSeries Color="Black"
+                                                ItemsSource="{Binding InterpolationValueData.XYValue}"
                                                 DataFieldX="X"
                                                 DataFieldY="Y"/>
-            <oxy:StairStepSeries Color="Black"
-                                                ItemsSource="{Binding IntegralValue.XYBuild}"
+                            </oxy:Plot>
+                        </TabItem>
+                    </TabControl>
+                    <DockPanel Grid.Column="1">
+                        <CheckBox DockPanel.Dock="Top" IsChecked="{Binding isBusyInterpolation, Mode=OneWay}" IsEnabled="False" Content="Занятось функции"/>
+                        <TabControl>
+                            <TabItem Header="Интерполирование в значении">
+                                <StackPanel Grid.Column="1">
+                                    <Button Content="Вычислить" Command="{Binding InterpolationRun}" CommandParameter="0"/>
+                                    <TextBlock Text="Число, для интерполирования X* - "/>
+                                    <TextBox Text="{Binding NeedInterpolationValue}"/>
+                                    <TextBlock Text="Значение X* - "/>
+                                    <TextBox Text="{Binding InterpolationValue}" IsEnabled="False"/>
+                                </StackPanel>
+                            </TabItem>
+                            <TabItem Header="Интерполирование с шагом">
+                                <StackPanel Grid.Column="1">
+                                    <Button Content="Вычислить" Command="{Binding InterpolationRun}" CommandParameter="1"/>
+                                    <TextBlock Text="Шаг для интерполирования - "/>
+                                    <TextBox Text="{Binding NeedInterpolationStep}"/>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Дифференцирование">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <TabControl>
+                        <TabItem Header="Таблица">
+                            <DataGrid Grid.Column="0" ItemsSource="{Binding DifferentiationValueData.XYValue}" AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn IsReadOnly="False" Header="X" Binding="{Binding X}" Width="*"/>
+                                    <DataGridTextColumn IsReadOnly="False" Header="Y" Binding="{Binding Y}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem Header="График">
+                            <oxy:Plot>
+                                <oxy:Plot.Axes>
+                                    <oxy:LinearAxis Position="Left"/>
+                                    <oxy:LinearAxis Position="Bottom"/>
+                                </oxy:Plot.Axes>
+                                <oxy:LineSeries Color="Black"
+                                                ItemsSource="{Binding DifferentiationValueData.XYValue}"
                                                 DataFieldX="X"
                                                 DataFieldY="Y"/>
-            <oxy:LinearBarSeries Color="Black"
-                                                ItemsSource="{Binding IntegralValue.XYBuild}"
+                            </oxy:Plot>
+                        </TabItem>
+                    </TabControl>
+                    <DockPanel Grid.Column="1">
+                        <CheckBox DockPanel.Dock="Top" IsChecked="{Binding isBusyDifferentiation, Mode=OneWay}" IsEnabled="False" Content="Занятось функции"/>
+                        <TabControl Grid.Column="1">
+                            <TabItem Header="Дифференцирование в значении">
+                                <StackPanel Grid.Column="1">
+                                    <Button Content="Вычислить" Command="{Binding DifferentiationRun}" CommandParameter="0"/>
+                                    <TextBlock Text="Число, для дифференцирования X* - "/>
+                                    <TextBox Text="{Binding NeedDifferentiationValue}"/>
+                                    <TextBlock Text="Значение f`(X*)  - "/>
+                                    <TextBox Text="{Binding DifferentiationValue}" IsEnabled="False"/>
+                                    <TextBlock Text="Значение f``(X*) - "/>
+                                    <TextBox Text="{Binding DoubleDifferentiationValue}" IsEnabled="False"/>
+                                </StackPanel>
+                            </TabItem>
+                            <TabItem Header="Дифференцирование с шагом">
+                                <StackPanel Grid.Column="1">
+                                    <Button Content="Вычислить" Command="{Binding DifferentiationRun}" CommandParameter="1"/>
+                                    <TextBlock Text="Шаг для дифференцирования - "/>
+                                    <TextBox Text="{Binding NeedDifferentiationStep}"/>
+                                </StackPanel>
+                            </TabItem>
+                            <TabItem Header="Дифференцирование с шагом Рунге">
+                                <StackPanel Grid.Column="1">
+                                    <Button Content="Вычислить" Command="{Binding DifferentiationRun}" CommandParameter="2"/>
+                                    <TextBlock Text="Значение ошибки E - "/>
+                                    <TextBox Text="{Binding NeedDifferentiationError}"/>
+                                    <TextBlock Text="Число, для дифференцирования X* - "/>
+                                    <TextBox Text="{Binding NeedDifferentiationValue}"/>
+                                    <TextBlock Text="X* с заданой точностью - "/>
+                                    <TextBox Text="{Binding DifferentiationValue}" IsEnabled="False"/>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Интегрирование">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <TabControl>
+                        <TabItem Header="Таблица">
+                            <TextBox IsReadOnly="True" TextWrapping="Wrap" Text="{Binding IntegralProtocol}" 
+                                       ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                       ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                        </TabItem>
+                        <TabItem Header="График">
+                            <oxy:Plot>
+                                <oxy:Plot.Axes>
+                                    <oxy:LinearAxis Position="Left"/>
+                                    <oxy:LinearAxis Position="Bottom"/>
+                                </oxy:Plot.Axes>
+                                <oxy:LineSeries Color="Green"
+                                                ItemsSource="{Binding DataValue.XYValue}"
                                                 DataFieldX="X"
                                                 DataFieldY="Y"/>
-        </oxy:Plot>
+                                <oxy:AreaSeries Color="Black"
+                                                ItemsSource="{Binding IntegralValueData.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                            </oxy:Plot>
+                        </TabItem>
+                    </TabControl>
+                    <DockPanel Grid.Column="1">
+                        <CheckBox DockPanel.Dock="Top" IsChecked="{Binding isBusyIntegral, Mode=OneWay}" IsEnabled="False" Content="Занятось функции"/>
+                        <TabControl Grid.Column="1">
+                            <TabItem Header="Дифференцирование с шагом">
+                                <StackPanel Grid.Column="1">
+                                    <Button Content="Вычислить" Command="{Binding IntegralRun}" CommandParameter="0"/>
+                                    <TextBlock Text="А значение - "/>
+                                    <TextBox Text="{Binding NeedIntegralAValue}"/>
+                                    <TextBlock Text="B значение - "/>
+                                    <TextBox Text="{Binding NeedIntegralBValue}"/>
+                                    <TextBlock Text="Значение максимум интервалов - "/>
+                                    <TextBox Text="{Binding NeedIntegralInterval}"/>
+                                    <TextBlock Text="Значение узлов - "/>
+                                    <TextBox Text="{Binding NeedIntegralBValue, Mode=OneWay}" IsEnabled="False"/>
+                                    <TextBlock Text="Значение интеграла на интервале {A; B}"/>
+                                    <TextBox Text="{Binding IntegralValue}" IsEnabled="False"/>
+                                </StackPanel>
+                            </TabItem>
+                            <TabItem Header="Интегрирование с шагом Рунге">
+                                <StackPanel Grid.Column="1">
+                                    <Button Content="Вычислить" Command="{Binding IntegralRun}" CommandParameter="1"/>
+                                    <TextBlock Text="Значение ошибки E - "/>
+                                    <TextBox Text="{Binding NeedIntegralError}"/>
+                                    <TextBlock Text="А значение - "/>
+                                    <TextBox Text="{Binding NeedIntegralAValue}"/>
+                                    <TextBlock Text="B значение - "/>
+                                    <TextBox Text="{Binding NeedIntegralBValue}"/>
+                                    <TextBlock Text="Значение интеграла на интервале {A; B} - с ошибкой E за Рунге"/>
+                                    <TextBox Text="{Binding IntegralValue}" IsEnabled="False"/>
+                                </StackPanel>
+                            </TabItem>
+                            <TabItem Header="Интегрирование с шагом остаточного числа">
+                                <StackPanel Grid.Column="1">
+                                    <Button Content="Вычислить" Command="{Binding IntegralRun}" CommandParameter="2"/>
+                                    <TextBlock Text="Значение ошибки E - "/>
+                                    <TextBox Text="{Binding NeedIntegralError}"/>
+                                    <TextBlock Text="А значение - "/>
+                                    <TextBox Text="{Binding NeedIntegralAValue}"/>
+                                    <TextBlock Text="B значение - "/>
+                                    <TextBox Text="{Binding NeedIntegralBValue}"/>
+                                    <TextBlock Text="Значение интеграла на интервале {A; B} - с ошибкой E за остаточного числа"/>
+                                    <TextBox Text="{Binding IntegralValue}" IsEnabled="False"/>
+                                </StackPanel>
+                            </TabItem>
+                            <TabItem Header="Дифференцирование за Гауссом(только для интегрирования Гаусса)">
+                                <StackPanel Grid.Column="1">
+                                    <Button Content="Вычислить" Command="{Binding IntegralRun}" CommandParameter="3"/>
+                                    <TextBlock Text="А значение - "/>
+                                    <TextBox Text="{Binding NeedIntegralAValue}"/>
+                                    <TextBlock Text="B значение - "/>
+                                    <TextBox Text="{Binding NeedIntegralBValue}"/>
+                                    <TextBlock Text="Значение максимум для n1- "/>
+                                    <TextBox Text="{Binding NeedIntegralInterval}"/>
+                                    <TextBlock Text="Значение максимум для n2 - "/>
+                                    <TextBox Text="{Binding NeedIntegralIntervalSecond}"/>
+                                    <TextBlock Text="Значение интеграла на интервале {A; B}"/>
+                                    <TextBox Text="{Binding IntegralValue}" IsEnabled="False"/>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Площадь фигуры">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <TabControl>
+                        <TabItem Header="Таблица">
+                            <DataGrid Grid.Column="0"  AutoGenerateColumns="False">
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem Header="График">
+                            <oxy:Plot>
+                                <oxy:Plot.Axes>
+                                    <oxy:LinearAxis Position="Left"/>
+                                    <oxy:LinearAxis Position="Bottom"/>
+                                </oxy:Plot.Axes>
+                                <oxy:ScatterErrorSeries Color="Black"
+                                                ItemsSource="{Binding FormulaData.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                                <oxy:LineSeries Color="Green"
+                                                ItemsSource="{Binding FormulaDataMaxMin.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                                <oxy:ScatterErrorSeries
+                                                ItemsSource="{Binding RandomPointValue.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                                <oxy:ScatterErrorSeries
+                                                ItemsSource="{Binding RandomPointApproved.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                            </oxy:Plot>
+                        </TabItem>
+                        <TabItem Header="График">
+                            <oxy:Plot>
+                                <oxy:Plot.Axes>
+                                    <oxy:LinearAxis Position="Left"/>
+                                    <oxy:LinearAxis Position="Bottom"/>
+                                </oxy:Plot.Axes>
+                                <oxy:LineSeries Color="Black"
+                                                ItemsSource="{Binding RandomPointSPerCount.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                                <oxy:LineSeries Color="Green"
+                                                ItemsSource="{Binding AAveragePlus.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                                <oxy:LineSeries Color="Green"
+                                                ItemsSource="{Binding AAverageMinus.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                            </oxy:Plot>
+                        </TabItem>
+                    </TabControl>
+                    <DockPanel Grid.Column="1">
+                        <CheckBox DockPanel.Dock="Top" IsChecked="{Binding isBusyFigureRun, Mode=OneWay}" IsEnabled="False" Content="Занятось функции"/>
+                        <TabControl Grid.Column="1">
+                            <TabItem Header="Задать фигуру">
+                                <StackPanel Grid.Column="1">
+                                    <ComboBox ItemsSource="{Binding FormulaDatas}"  SelectedItem="{Binding SelectedFormula}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock>
+                                                    <TextBlock.Text>
+                                                        <MultiBinding StringFormat="{}{0} : [A,B] [{1}, {2}]">
+                                                            <Binding Path="Formula" />
+                                                            <Binding Path="A" />
+                                                            <Binding Path="B" />
+                                                        </MultiBinding>
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                    <TextBlock Text="Формула для добавления"/>
+                                    <TextBox Text="{Binding FormulaForAdd.Formula}"/>
+                                    <TextBlock Text="A - значение для формулы"/>
+                                    <TextBox Text="{Binding FormulaForAdd.A}"/>
+                                    <TextBlock Text="B - значение для формулы"/>
+                                    <TextBox Text="{Binding FormulaForAdd.B}"/>
+                                    <Button Content="Добавить формулу" Command="{Binding FiguraDataRun}" CommandParameter="0"/>
+                                    <Button Content="Удалить формулу" Command="{Binding FiguraDataRun}" CommandParameter="1"/>
+                                    <TextBlock Text="Функция от A - B"/>
+                                    <TextBlock Text="Значение A"/>
+                                    <TextBox Text="{Binding FunctionAValue}"/>
+                                    <TextBlock Text="Значение B"/>
+                                    <TextBox Text="{Binding FunctionBValue}"/>
+                                    <TextBlock Text="Количество елементов на построение каждой функции"/>
+                                    <TextBox Text="{Binding FunctionCountValue}"/>
+                                    <Button Content="Построить фигуру" Command="{Binding BuildFigureRun}"/>
+                                    <TextBlock Text="Количество случайных чисел"/>
+                                    <TextBox Text="{Binding RandomPointCount}"/>
+                                    <Button Content="Построить случайные точки" Command="{Binding FindSRun}"/>
+                                    <TextBlock Text="Точна площина"/>
+                                    <TextBox Text="{Binding SValueApproved}"/>
+                                    <TextBlock Text="Площадь"/>
+                                    <TextBox Text="{Binding SValue}" IsEnabled="False"/>
+                                </StackPanel>
+                            </TabItem>
+                        </TabControl>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Кубатурная формула">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <TabControl>
+                        <TabItem Header="Таблица">
+                            <DataGrid Grid.Column="0" ItemsSource="{Binding Cubature.ElementValue}"  AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn IsReadOnly="False" Header="X" Binding="{Binding X}" Width="*"/>
+                                    <DataGridTextColumn IsReadOnly="False" Header="Y" Binding="{Binding Y}" Width="*"/>
+                                    <DataGridTextColumn IsReadOnly="False" Header="Z" Binding="{Binding Z}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem Header="График">
+                            <oxy:Plot>
+                                <oxy:Plot.Axes>
+                                    <oxy:LinearAxis Position="Left"/>
+                                    <oxy:LinearAxis Position="Bottom"/>
+                                </oxy:Plot.Axes>
+                                <oxy:LineSeries Color="Black"
+                                                ItemsSource="{Binding Cubature.FunctionErrorX.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                                <oxy:LineSeries Color="Green"
+                                                ItemsSource="{Binding Cubature.FunctionErrorY.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                            </oxy:Plot>
+                        </TabItem>
+                    </TabControl>
+                    <DockPanel Grid.Column="1">
+                        <CheckBox DockPanel.Dock="Top" IsChecked="{Binding isBusyFindDoubleIntegral, Mode=OneWay}" IsEnabled="False" Content="Занятось функции"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="A значение"/>
+                            <TextBox Text="{Binding Cubature.A}"/>
+                            <TextBlock Text="B значение"/>
+                            <TextBox Text="{Binding Cubature.B}"/>
+                            <TextBlock Text="A формула"/>
+                            <TextBox Text="{Binding Cubature.AFormula}"/>
+                            <TextBlock Text="B формула"/>
+                            <TextBox Text="{Binding Cubature.BFormula}"/>
+                            <TextBlock Text="f(x, y) = "/>
+                            <TextBox Text="{Binding Cubature.FXY}"/>
+                            <TextBlock Text="Кількість вузлів по X"/>
+                            <TextBox Text="{Binding Cubature.NX}"/>
+                            <TextBlock Text="Кількість вузлів по Y"/>
+                            <TextBox Text="{Binding Cubature.NY}"/>
+                            <TextBlock Text="Значение точности(от 1, до 7)"/>
+                            <TextBox Text="{Binding Cubature.AccuracyValue}"/>
+                            <TextBlock Text="Точное значение интеграла"/>
+                            <TextBox Text="{Binding Cubature.IntegralValueRight}"/>
+                            <TextBlock Text="Значение интеграла"/>
+                            <TextBox Text="{Binding CubatureValue}" IsReadOnly="True"/>
+                            <Button Content="Найти интеграл" Command="{Binding FindDoubleIntegral}"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Метод квадратних сум">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*"/>
+                        <ColumnDefinition Width="1*"/>
+                    </Grid.ColumnDefinitions>
+                    <TabControl>
+                        <TabItem Header="Таблица">
+                            <DataGrid Grid.Column="0" ItemsSource="{Binding Fredgolma.DataModel.XYValue}"  AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn IsReadOnly="False" Header="X" Binding="{Binding X}" Width="*"/>
+                                    <DataGridTextColumn IsReadOnly="False" Header="Y" Binding="{Binding Y}" Width="*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem Header="График">
+                            <oxy:Plot>
+                                <oxy:Plot.Axes>
+                                    <oxy:LinearAxis Position="Left"/>
+                                    <oxy:LinearAxis Position="Bottom"/>
+                                </oxy:Plot.Axes>
+                                <oxy:LineSeries Color="Black"
+                                                ItemsSource="{Binding Fredgolma.DataModel.XYValue}"
+                                                DataFieldX="X"
+                                                DataFieldY="Y"/>
+                            </oxy:Plot>
+                        </TabItem>
+                    </TabControl>
+                    <DockPanel Grid.Column="1">
+                        <CheckBox DockPanel.Dock="Top" IsChecked="{Binding isBusyIntegralValueSimpson, Mode=OneWay}" IsEnabled="False" Content="Занятось функции"/>
+                        <StackPanel>
+                            <TextBlock Text="y(x) - I(f(x)*y(s)) = f(x)"/>
+                            <TextBlock Text="Интеграл K(x,s) - "/>
+                            <TextBox Text="{Binding Fredgolma.IntegralFunctionLine}"/>
+                            <TextBlock Text="A - "/>
+                            <TextBox Text="{Binding Fredgolma.A}"/>
+                            <TextBlock Text="B - "/>
+                            <TextBox Text="{Binding Fredgolma.B}"/>
+                            <TextBlock Text="f(x) - "/>
+                            <TextBox Text="{Binding Fredgolma.FunctionLine}"/>
+                            <TextBlock Text="Точность n - "/>
+                            <TextBox Text="{Binding Fredgolma.ErrorNValue}"/>
+                            <Button Content="Посчитать Симпсона" Command="{Binding IntegralValueSimpson}" CommandParameter="0"/>
+                            <Button Content="Посчитать Трапеций" Command="{Binding IntegralValueSimpson}" CommandParameter="1"/>
+                            <TextBlock Text="Формула, которая получилось - "/>
+                            <TextBox Text="{Binding Fredgolma.AnswerValue}"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>
